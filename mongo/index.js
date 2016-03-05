@@ -67,13 +67,23 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   var fileInfo = exec('pdfinfo ' + fileString).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
-  for(var p = 1; p < 10; p++){
-  	// save text to file
-  	exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' ' + folderString + '-' + p + '.txt');
+  console.time("pdftotext"); // on my comp this is averaging about 35s on 250pg book
+  for(var p = 1; p < numberOfPages; p++){
+  	// save text to file, 
+  	// exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' ' + folderString + '-' + p + '.txt');
   	// text to stdout
-  	// var pageText = exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' -').stdout;
+  	var pageText = exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' -',{silent:true}).stdout;
   	// then I would pass it to mongo
+  	var page = new Document({
+  		title: folderString,
+  		page: p,
+  		text: pageText
+  	});
+
+  	if(typeof Document !== 'undefined') saveDocument(page);
+
   }
+  console.timeEnd("pdftotext");
 
   // now that the pages are all separated, we have to manually add the text for each page to our db
   // exec('pdftotext')
@@ -97,6 +107,8 @@ mongoose.connect('mongodb://localhost/test');
 var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 
+var docSchema;
+var Document;
 
 // once connected, do stuff
 db.once('open', function() {
@@ -104,21 +116,23 @@ db.once('open', function() {
   // we're connected!
 
   // define document schema
-  var docSchema = mongoose.Schema({
-  	title: String
+  docSchema = mongoose.Schema({
+  	title: String,
+  	page: Number,
+  	text: String
   });
 
   // make sure to add any methods b4 defining the model
   docSchema.methods.test = function () {
   	// code that might do something, can reference self with 'this.title' etc.
-  	console.log(this.title + "'s test function");
+  	console.log(this.title + " page: " + this.page + " complete");
   }
 
   // define document model
-  var Document = mongoose.model('Document', docSchema);
+  Document = mongoose.model('Document', docSchema);
 
   // listAllDocs(Document);
-  searchDocs(Document, 'Second');
+  searchDocs(Document, 'cryptoanalysis');
 
   // create a dummy Doc and save it
 
@@ -136,16 +150,19 @@ function listAllDocs(DocModel){
 }
 
 function searchDocs(DocModel, keyword){
+	console.time('searchTime');
 	var r = new RegExp(keyword,'');
-	DocModel.find({ 'title': {$regex:r}}, function(err, results){
+	DocModel.find({ 'text': {$regex:r}}, function(err, results){
 		if (err) return console.error(err);
 		// returns results array
 		if(results.length > 0) {
-			console.log('found: ' + results[0]);
+			for (var nextResult of results){
+				console.log(nextResult.page);
+			}
 		} else {
 			console.log('no results');
 		}
-		
+		console.timeEnd('searchTime');
 	});
 }
 
