@@ -1,3 +1,94 @@
+require('shelljs/global');
+var util = require('util');
+
+// EXPRESS APP
+
+var express  =  require( 'express' );
+var multer   =  require( 'multer' );
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  }
+})
+
+var upload   =  multer( { storage: storage } );
+
+var exphbs   =  require( 'express-handlebars' );
+require( 'string.prototype.startswith' );
+
+var app = express();
+
+app.use( express.static( __dirname + '/bower_components' ) );
+
+app.engine( '.hbs', exphbs( { extname: '.hbs' } ) );
+app.set('view engine', '.hbs');
+
+app.get( '/', function( req, res, next ){
+  return res.render( 'index' );
+});
+
+app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
+
+	console.log("got a post from: " + req.file.filename);
+
+  if ( !req.file.mimetype.startsWith( 'application/pdf' ) ) {
+    return res.status( 422 ).json( {
+      error : 'The uploaded file must be a pdf'
+    } );
+  }
+
+  // I think this is where I'd start doing stuff,,,
+  // 
+  // RUN A BUNCH OF SHELL STUFF
+
+  cd('uploads');
+  var fileString = req.file.originalname;
+  var folderString = fileString.slice(0,-4);
+  mkdir(folderString);
+  mv(fileString,folderString);
+  cd(folderString);
+
+  // method 1: get number of pages and pdftotext each page, send stdout of pdftotext
+  // directly to mongo,, upside: no extra files,, downside: if we wanted to return just 
+  // the page of the pdf (i.e. if we wanted to display it) we would have to 
+  // send the whole book
+
+  // grab pdf info
+  if(!which('pdfinfo')){
+  	console.log('whoops you need to install pdfseparate');
+  	return res.status( 422 ).json ( { 
+  		error : 'server missing dependency'
+  	});
+  }
+  var fileInfo = exec('pdfinfo ' + fileString).stdout;
+  var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
+
+  for(var p = 1; p < 10; p++){
+  	// save text to file
+  	exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' ' + folderString + '-' + p + '.txt');
+  	// text to stdout
+  	// var pageText = exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' -').stdout;
+  	// then I would pass it to mongo
+  }
+
+  // now that the pages are all separated, we have to manually add the text for each page to our db
+  // exec('pdftotext')
+
+  // method 2: pdfseparate, then pdftotext each separate page
+
+  return res.status( 200 ).send( req.file );
+});
+
+app.listen( 8080, function() {
+  console.log( 'Express server listening on port 8080' );
+});
+
+// DATABASE STUFF
+
 var mongoose = require('mongoose');
 
 // connect to database
