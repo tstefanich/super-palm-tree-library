@@ -136,17 +136,17 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   mv(req.file.filename,fileString);
 
 
-  var fileInfo = exec('pdfinfo ' + fileString, {silent:true}).stdout;
+  var fileInfo = exec('pdfinfo ' + fileString).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
   // Check to see if PDF has text
-  var pdfTitle = /Title:\s+(\d+)/g.exec(fileInfo);
+  var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo)[1];
   console.log(pdfTitle);
   if(pdfTitle == null){
     console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
   }
 
-  var pdfAuthor = /Author:\s+(\d+)/g.exec(fileInfo);
+  var pdfAuthor = /Author:\s+(\w+.*)/g.exec(fileInfo)[1];
   if(pdfAuthor == null){
     console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
   }
@@ -233,9 +233,9 @@ db.once('open', function() {
   Document = mongoose.model('Document', docSchema);
 
   // listAllDocs(Document);
-  searchDocs(Document, 'blade runner', function(results){
-    console.log('first search')
-  });
+  //searchDocs(Document, 'blade runner', function(results){
+  //  console.log('first search')
+  //});
 
   // create a dummy Doc and save it
 
@@ -290,7 +290,7 @@ function searchDocs(DocModel, keyword, callback)
     .sort({ score : { $meta : 'textScore' } })
     .exec(function(err, results) {
       // console.log(results);
-        if(results.length > 0) {
+    if(results.length > 0) {
       for (var nextResult of results){
         items.push(nextResult);
         console.log(nextResult.title + ' : ' + nextResult.page + ' : ' + nextResult.text);
