@@ -20,7 +20,7 @@ var sptLIB = module.exports = {
 
 /************************************
 
-TEMPORARY FUNCTION FOR SEARCH RESULTS
+TEMPORARY FUNCTIONS FOR SEARCH RESULTS
 
 ************************************/
 function pagelist(items) {
@@ -35,6 +35,23 @@ function pagelist(items) {
   return result;
 }
 
+var books = {};
+function collapsePagesIntoBooks(data)
+{
+  data.forEach(function(doc, index) { // Maybe change the type of loop
+      var currentBook = doc.title;
+      if(books[currentBook] === undefined){
+        books[currentBook] = 0;
+      }
+      books[currentBook] += 1;
+  });
+
+  // Loop to print only the Unique books 
+  for(var prop in books){
+    console.log("the book is "+prop+": with this many pages" +books[prop]);
+  }
+  return books;
+}
 /************************************
 
  EXPRESS APP
@@ -42,11 +59,11 @@ function pagelist(items) {
 ************************************/
 
 var express  =  require( 'express' );
+var exphbs   =  require( 'express-handlebars' );
 var multer   =  require( 'multer' );
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-
     cb(null, __dirname + '/uploads/');
   }
 });
@@ -62,13 +79,14 @@ require( 'string.prototype.startswith' );
 
 var app = express();
 var bodyParser = require('body-parser')
-app.use( express.static( __dirname + '/bower_components' ) );
+app.use(express.static( __dirname + '/bower_components' ) );
 app.use(express.static(__dirname + '/views'));
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
-app.engine('html', require('ejs').renderFile);
-app.listen( 8080, function() {  
-  console.log( 'Express server listening on port 8080' );
-});
+//app.engine('html', require('ejs').renderFile);
+app.engine( '.hbs', exphbs( { extname: '.hbs' } ) );
+app.set('view engine', '.hbs');
+
+
 
 /************************************
 
@@ -77,11 +95,27 @@ app.listen( 8080, function() {
 ************************************/
 
 app.get( '/', function( req, res, next ){
-  return res.render( 'index' );
+  Document.aggregate(
+    { $group: 
+      { _id: '$title', totalPages: { $sum: 1 } } 
+    },
+    function (err, results) {
+      if (err) return handleError(err);
+      console.log(results);
+      return res.render('index', {'userlist' : results});
+   }
+  );
+    //Document.find({}, {}, function(e, docs) { // .distict vs .find
+      //var books = collapsePagesIntoBooks(docs);
+      //console.log(docs);
+      //return res.render('index', {'userlist' : books});
+    //});
+    //return res.render( 'index' );
+    //return res.render('index', {'userlist' : docs});
 });
 
 app.get( '/upload', function( req, res, next ){
-  return res.render( 'upload.html' );
+  return res.render( 'upload' );
 });
 
 app.get("/search", function(req, res, next) {
@@ -89,10 +123,11 @@ app.get("/search", function(req, res, next) {
     var query = req.query.s;
     searchDocs(Document, query, function(items){
       //console.log('found cryptoanalysis results '+ items);
-      return res.status( 200 ).send(pagelist(items));
+      //return res.status( 200 ).send(items);
+      res.render('search', {'search_results' : items});
     });
   } else {
-    return res.render('search.html');
+    return res.render('search');
   }
 });
 
@@ -310,3 +345,10 @@ function saveDocument(doc){
 		// doc.test(); // maybe run the function if you feel like it
 	});
 }
+
+
+
+
+app.listen( 8080, function() {  
+  console.log( 'Express server listening on port 8080' );
+});

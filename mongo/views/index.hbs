@@ -45,9 +45,9 @@
         border-bottom:1px dotted grey;
 
     }
+    #products .item.grid-group-item:first-child{display:none;}
     #products .item.grid-group-item .col{float: none;width:100%;}
     #products .item.grid-group-item .col:last-child{float: none;width:100%;border-bottom:1px dotted grey;padding-bottom: 15px;}
-
     #products .item.grid-group-item { padding-top:15px;}
     .item.list-group-item img{float:left;}
     #list{padding-left: 0;}
@@ -96,23 +96,21 @@
 
     <div class="container">
       <div id="products" class="">
-        <div class="item grid-group-item col-md-4">
-          <div class="col col-md-4">col-md-4</div>
-          <div class="col col-md-4">col-md-4</div>
-          <div class="col col-md-4">col-md-4</div>
+        <div class="item list-group-item clearfix col-md-4">
+          <div class="col col-md-4">Title</div>
+          <div class="col col-md-4">Author</div>
+          <div class="col col-md-4">Total Pages</div>
         </div>
-        <div class="item grid-group-item col-md-4">
-          <div class="col col-md-4">col-md-4</div>
-          <div class="col col-md-4">col-md-4</div>
-          <div class="col col-md-4">col-md-4</div>
-        </div>
-        <div class="item grid-group-item col-md-4">
-          <div class="col col-md-4">col-md-4</div>
-          <div class="col col-md-4">col-md-4</div>
-          <div class="col col-md-4">col-md-4</div>
-        </div>
+        {{#each userlist}}
+            <div class="item list-group-item clearfix col-md-4">
+              <div class="col col-md-4">{{_id}}</div>
+              <div class="col col-md-4">----</div>
+              <div class="col col-md-4">{{totalPages}}</div>
+            </div>
+        {{/each}}
       </div>
     </div><!-- /.container -->
+
 
 
     <!-- Bootstrap core JavaScript

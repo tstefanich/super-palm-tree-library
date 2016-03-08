@@ -13,6 +13,7 @@
     "chokidar": "^1.4.3",
     "ejs": "^2.4.1",
     "express": "^4.13.4",
+    "express-handlebars": "^3.0.0",
     "mongoose": "^4.4.6",
     "multer": "^1.1.0",
     "shelljs": "^0.6.0",
