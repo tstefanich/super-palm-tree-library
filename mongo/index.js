@@ -136,11 +136,12 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   mv(req.file.filename,fileString);
 
 
-  var fileInfo = exec('pdfinfo ' + fileString).stdout;
+  var fileInfo = exec('pdfinfo ' + fileString, {silent:true}).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
   // Check to see if PDF has text
   var pdfTitle = /Title:\s+(\d+)/g.exec(fileInfo);
+  console.log(pdfTitle);
   if(pdfTitle == null){
     console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
   }
@@ -232,7 +233,7 @@ db.once('open', function() {
   Document = mongoose.model('Document', docSchema);
 
   // listAllDocs(Document);
-  searchDocs(Document, 'cryptoanalysis', function(results){
+  searchDocs(Document, 'blade runner', function(results){
     console.log('first search')
   });
 
