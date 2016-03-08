@@ -46,12 +46,10 @@ var multer   =  require( 'multer' );
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname)
+
+    cb(null, __dirname + '/uploads/');
   }
-})
+});
 
 var upload   =  multer( { storage: storage } );
 require( 'string.prototype.startswith' );
@@ -114,16 +112,8 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
     } );
   }
 
-  // I think this is where I'd start doing stuff,,,
-  // 
-  // RUN A BUNCH OF SHELL STUFF
 
-  cd('uploads');
-  var fileString = req.file.originalname;
-  var folderString = fileString.slice(0,-4);
-  mkdir(folderString);
-  mv(fileString,folderString);
-  cd(folderString);
+  
 
   // method 1: get number of pages and pdftotext each page, send stdout of pdftotext
   // directly to mongo,, upside: no extra files,, downside: if we wanted to return just 
@@ -132,17 +122,26 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
   // grab pdf info
   if(!which('pdfinfo')){
-  	console.log('whoops you need to install pdfseparate');
+  	console.log('whoops you need to install poppler');
   	return res.status( 422 ).json ( { 
   		error : 'server missing dependency. Install Brew then type "brew install poppler"'
   	});
   }
 
-  var fileInfo = exec('pdfinfo ' + fileString).stdout;
+
+  // rename file
+  cd(__dirname + '/uploads');
+  var fileString = req.file.originalname;
+  var folderString = fileString.slice(0,-4);
+  mv(req.file.filename,fileString);
+
+
+  var fileInfo = exec('pdfinfo ' + fileString, {silent:true}).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
   // Check to see if PDF has text
   var pdfTitle = /Title:\s+(\d+)/g.exec(fileInfo);
+  console.log(pdfTitle);
   if(pdfTitle == null){
     console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
   }
@@ -184,6 +183,8 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
   // method 2: pdfseparate, then pdftotext each separate page
 
+  cd(__dirname);
+
   return res.status( 200 ).send( req.file );
 });
 
@@ -219,6 +220,9 @@ db.once('open', function() {
   	text: String
   });
 
+  // Very Important! Make the title and text parameters "text" indices
+  docSchema.index({text:'text'});
+
   // make sure to add any methods b4 defining the model
   docSchema.methods.test = function () {
   	// code that might do something, can reference self with 'this.title' etc.
@@ -229,7 +233,7 @@ db.once('open', function() {
   Document = mongoose.model('Document', docSchema);
 
   // listAllDocs(Document);
-  searchDocs(Document, 'cryptoanalysis', function(results){
+  searchDocs(Document, 'blade runner', function(results){
     console.log('first search')
   });
 
@@ -259,30 +263,50 @@ function listAllDocs(DocModel)
 function searchDocs(DocModel, keyword, callback)
 {
 	console.time('searchTime');
-	var r = new RegExp(keyword,'');
   var items = [];
-	DocModel.find({ 'text': {$regex:r}}, function(err, results){
-		if (err) return console.error(err);
+	// var r = new RegExp(keyword,'');
+ //  
+	// DocModel.find({ 'text': {$regex:r}}, function(err, results){
+	// 	if (err) return console.error(err);
 		
-    // returns results array
-		if(results.length > 0) {
-			for (var nextResult of results){
-				//console.log('page '+nextResult);
+ //    // returns results array
+	// 	if(results.length > 0) {
+	// 		for (var nextResult of results){
+	// 			//console.log('page '+nextResult);
+ //        items.push(nextResult);
+	// 		}
+	// 	} else {
+	// 		console.log('no results');
+	// 	}
+	// 	console.timeEnd('searchTime');
+ //    //console.log(items);
+ //    callback(items);
+	// });
+
+  DocModel.find(
+        { $text : { $search : keyword } }, 
+        { score : { $meta: "textScore" } }
+    )
+    .sort({ score : { $meta : 'textScore' } })
+    .exec(function(err, results) {
+      // console.log(results);
+        if(results.length > 0) {
+      for (var nextResult of results){
         items.push(nextResult);
-			}
-		} else {
-			console.log('no results');
-		}
-		console.timeEnd('searchTime');
-    //console.log(items);
+        console.log(nextResult.title + ' : ' + nextResult.page + ' : ' + nextResult.text);
+      }
+    } else {
+      console.log('no results');
+    }
+    console.timeEnd('searchTime');
     callback(items);
-	});
+    });
 
 }
 
 function saveDocument(doc){
 	doc.save(function (err, doc) {
 		if (err) return console.error(err);
-		doc.test(); // maybe run the function if you feel like it
+		// doc.test(); // maybe run the function if you feel like it
 	});
 }
