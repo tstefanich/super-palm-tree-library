@@ -37,3 +37,9 @@ jspm_packages
 db/
 done/
 todo/
+
+# ignore bower stuff? maybe not
+#bower_components
+
+# ignore contents of uploads
+uploads/

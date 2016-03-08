@@ -8,12 +8,16 @@ var multer   =  require( 'multer' );
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
+  	console.log("destination called");
+
+    cb(null, __dirname + '/uploads/'); // this is affected by shelljs! careful with your pwd
+  }
+  ,
   filename: function (req, file, cb) {
+  	console.log("filename called");
     cb(null, file.originalname)
   }
-})
+});
 
 var upload   =  multer( { storage: storage } );
 
@@ -28,6 +32,7 @@ app.engine( '.hbs', exphbs( { extname: '.hbs' } ) );
 app.set('view engine', '.hbs');
 
 app.get( '/', function( req, res, next ){
+	console.log("index loaded");
   return res.render( 'index' );
 });
 
@@ -41,21 +46,20 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
     } );
   }
 
-  // I think this is where I'd start doing stuff,,,
   // 
   // RUN A BUNCH OF SHELL STUFF
-
-  cd('uploads');
-  var fileString = req.file.originalname;
-  var folderString = fileString.slice(0,-4);
-  mkdir(folderString);
-  mv(fileString,folderString);
-  cd(folderString);
 
   // method 1: get number of pages and pdftotext each page, send stdout of pdftotext
   // directly to mongo,, upside: no extra files,, downside: if we wanted to return just 
   // the page of the pdf (i.e. if we wanted to display it) we would have to 
   // send the whole book
+
+
+  cd(__dirname + '/uploads');
+  var fileString = req.file.originalname;
+  var folderString = fileString.slice(0,-4);
+
+  mv(req.file.filename,fileString);
 
   // grab pdf info
   if(!which('pdfinfo')){
@@ -64,11 +68,13 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   		error : 'server missing dependency'
   	});
   }
-  var fileInfo = exec('pdfinfo ' + fileString).stdout;
+  var fileInfo = exec('pdfinfo ' + fileString,{silent:true}).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
+  // using this method (plus mongo's text indexing (I hope)) it took about 15min to do
+  // the whole adorno folder (~63 pdfs, 5727 pages)
   console.time("pdftotext"); // on my comp this is averaging about 35s on 250pg book
-  for(var p = 1; p < numberOfPages; p++){
+  for(var p = 1; p <= numberOfPages; p++){
   	// save text to file, 
   	// exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' ' + folderString + '-' + p + '.txt');
   	// text to stdout
@@ -83,6 +89,7 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   	if(typeof Document !== 'undefined') saveDocument(page);
 
   }
+  console.log(folderString + " completed");
   console.timeEnd("pdftotext");
 
   // now that the pages are all separated, we have to manually add the text for each page to our db
@@ -90,7 +97,17 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
   // method 2: pdfseparate, then pdftotext each separate page
 
+
+
+  // get back to home folder
+  cd(__dirname);
+
   return res.status( 200 ).send( req.file );
+});
+
+app.use(function(err, req, res, next) {
+    console.log(err);
+    next(err);
 });
 
 app.listen( 8080, function() {
@@ -122,6 +139,9 @@ db.once('open', function() {
   	text: String
   });
 
+  // Very Important! Make the title and text parameters "text" indices
+  docSchema.index({text:'text'});
+
   // make sure to add any methods b4 defining the model
   docSchema.methods.test = function () {
   	// code that might do something, can reference self with 'this.title' etc.
@@ -132,7 +152,7 @@ db.once('open', function() {
   Document = mongoose.model('Document', docSchema);
 
   // listAllDocs(Document);
-  searchDocs(Document, 'cryptoanalysis');
+  searchDocs(Document, 'blade runner');
 
   // create a dummy Doc and save it
 
@@ -151,24 +171,44 @@ function listAllDocs(DocModel){
 
 function searchDocs(DocModel, keyword){
 	console.time('searchTime');
-	var r = new RegExp(keyword,'');
-	DocModel.find({ 'text': {$regex:r}}, function(err, results){
-		if (err) return console.error(err);
-		// returns results array
-		if(results.length > 0) {
+
+	// non text indexed search
+	// var r = new RegExp(keyword,'');
+	// DocModel.find({ 'text': {$regex:r}}, function(err, results){
+	// 	if (err) return console.error(err);
+	// 	// returns results array
+	// 	if(results.length > 0) {
+	// 		for (var nextResult of results){
+	// 			console.log(nextResult.title + ' : ' + nextResult.page);
+	// 		}
+	// 	} else {
+	// 		console.log('no results');
+	// 	}
+	// 	console.timeEnd('searchTime');
+	// });
+
+	// text indexed search
+	DocModel.find(
+        { $text : { $search : keyword } }, 
+        { score : { $meta: "textScore" } }
+    )
+    .sort({ score : { $meta : 'textScore' } })
+    .exec(function(err, results) {
+    	// console.log(results);
+        if(results.length > 0) {
 			for (var nextResult of results){
-				console.log(nextResult.page);
+				console.log(nextResult.title + ' : ' + nextResult.page + ' : ' + nextResult.text);
 			}
 		} else {
 			console.log('no results');
 		}
 		console.timeEnd('searchTime');
-	});
+    });
 }
 
 function saveDocument(doc){
 	doc.save(function (err, doc) {
 		if (err) return console.error(err);
-		doc.test(); // maybe run the function if you feel like it
+		// doc.test(); // maybe run the function if you feel like it
 	});
 }

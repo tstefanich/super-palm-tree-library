@@ -30,6 +30,7 @@
     <script type="text/javascript">
       Dropzone.options.uploadWidget = {
         paramName: 'file',
+        parallelUploads:4,
         dictDefaultMessage: 'Drag here to upload, or click to select one',
         init: function() {
           this.on('success', function( file, resp ){
