@@ -185,6 +185,7 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
   // Check to see if PDF has text
 <<<<<<< HEAD
+<<<<<<< HEAD
  // var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo)[1];
  // console.log(pdfTitle);
  // if(pdfTitle == null){
@@ -196,6 +197,8 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
  //   console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
   //}
 =======
+=======
+>>>>>>> johnbrumley/master
   var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo);
   if(pdfTitle == null){
     console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
