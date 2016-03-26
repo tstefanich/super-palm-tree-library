@@ -1,5 +1,6 @@
 require('shelljs/global');
 var util = require('util');
+var fs = require('fs');
 
 /************************************
 
@@ -82,6 +83,9 @@ var bodyParser = require('body-parser')
 app.use(express.static( __dirname + '/bower_components' ) );
 app.use(express.static(__dirname + '/views'));
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
 //app.engine('html', require('ejs').renderFile);
 app.engine( '.hbs', exphbs( { extname: '.hbs' } ) );
 app.set('view engine', '.hbs');
@@ -136,6 +140,9 @@ app.get("/search", function(req, res, next) {
  EXPRESS POST
 
 ************************************/
+app.post( '/delete', function( req, res ) {
+  removeFileFromServer(req);
+}); 
 
 app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
@@ -175,16 +182,16 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
   // Check to see if PDF has text
-  var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo)[1];
-  console.log(pdfTitle);
-  if(pdfTitle == null){
-    console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
-  }
+ // var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo)[1];
+ // console.log(pdfTitle);
+ // if(pdfTitle == null){
+ //   console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
+ // }
 
-  var pdfAuthor = /Author:\s+(\w+.*)/g.exec(fileInfo)[1];
-  if(pdfAuthor == null){
-    console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
-  }
+  //var pdfAuthor = /Author:\s+(\w+.*)/g.exec(fileInfo)[1];
+  //if(pdfAuthor == null){
+ //   console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
+  //}
 
   // Check to see if PDF has metadata has Title, Author, (maybe these too --- subject, keywords)
   //var pdfMetaData = exec('pdftotext ' + fileString +' - | wc -l').stdout;
@@ -346,8 +353,27 @@ function saveDocument(doc){
 	});
 }
 
+function clearSomeDocuments(searchTerm, callback) {
+  var query = searchTerm + '.pdf';
+  Document.remove({ title: query }, function (err) {
+    if (err) return handleError(err);
+    // removed!
+  });
 
+};
 
+function clearAllDocumentsFromDatabase(db, callback) {
+   Document.remove({}, function (err) {
+     if (err) return handleError(err);
+     // removed!
+   });
+};
+
+function removeFileFromServer(req){
+  var filePath = req.body.filePath;
+  fs.unlinkSync(filePath);
+  clearSomeDocuments(db,filePath)
+}
 
 app.listen( 8080, function() {  
   console.log( 'Express server listening on port 8080' );
