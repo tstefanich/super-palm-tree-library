@@ -173,14 +173,18 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
   // rename file
   cd(__dirname + '/uploads');
+  // some issues with shell when '&' appears in filename, this is a temporary solution
+  var fileString = req.file.originalname.replace('&','and');
   var folderString = fileString.slice(0,-4);
   mv(req.file.filename,fileString);
 
+  console.log(fileString);
 
   var fileInfo = exec('pdfinfo ' + fileString).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
   // Check to see if PDF has text
+<<<<<<< HEAD
  // var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo)[1];
  // console.log(pdfTitle);
  // if(pdfTitle == null){
@@ -191,6 +195,18 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   //if(pdfAuthor == null){
  //   console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
   //}
+=======
+  var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo);
+  if(pdfTitle == null){
+    console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
+  }
+
+  var pdfAuthor = /Author:\s+(\w+.*)/g.exec(fileInfo);
+  console.log('author' + pdfAuthor);
+  if(pdfAuthor == null){
+    console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
+  }
+>>>>>>> johnbrumley/master
 
   // Check to see if PDF has metadata has Title, Author, (maybe these too --- subject, keywords)
   //var pdfMetaData = exec('pdftotext ' + fileString +' - | wc -l').stdout;
