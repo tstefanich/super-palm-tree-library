@@ -94,4 +94,19 @@ function countCollection(callback){
 	});
 }
 
+function clearSomeDocumentsFromCollection(searchTerm, callback) {
+  var query = searchTerm + '.pdf';
+  var model = connectToDatabase();
+  model.remove({ title: query }, function (err) {
+    if (err) return handleError(err);
+    // removed!
+  });
+};
+
+function removeFileFromServer(req){
+  var filePath = req.body.filePath;
+  fs.unlinkSync(filePath);
+  clearSomeDocuments(db,filePath)
+}
+
 

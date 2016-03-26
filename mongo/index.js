@@ -183,22 +183,7 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   var fileInfo = exec('pdfinfo ' + fileString).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
-  // Check to see if PDF has text
-<<<<<<< HEAD
-<<<<<<< HEAD
- // var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo)[1];
- // console.log(pdfTitle);
- // if(pdfTitle == null){
- //   console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
- // }
 
-  //var pdfAuthor = /Author:\s+(\w+.*)/g.exec(fileInfo)[1];
-  //if(pdfAuthor == null){
- //   console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
-  //}
-=======
-=======
->>>>>>> johnbrumley/master
   var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo);
   if(pdfTitle == null){
     console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
@@ -209,7 +194,6 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   if(pdfAuthor == null){
     console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
   }
->>>>>>> johnbrumley/master
 
   // Check to see if PDF has metadata has Title, Author, (maybe these too --- subject, keywords)
   //var pdfMetaData = exec('pdftotext ' + fileString +' - | wc -l').stdout;
