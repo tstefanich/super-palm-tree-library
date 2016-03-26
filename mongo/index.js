@@ -173,7 +173,6 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
   // rename file
   cd(__dirname + '/uploads');
-  var fileString = req.file.originalname;
   var folderString = fileString.slice(0,-4);
   mv(req.file.filename,fileString);
 
