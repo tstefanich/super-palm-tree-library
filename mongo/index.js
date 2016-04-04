@@ -2,6 +2,27 @@ require('shelljs/global');
 var util = require('util');
 var fs = require('fs');
 
+/*
+var pdfThumbnail = new FS.Store.FileSystem("thumbs", {
+  transformWrite: function(fileObj, readStream, writeStream) {
+    gm(readStream, fileObj.name() + '[0]').resize('100', '100').stream('png').pipe(writeStream);
+  },
+  beforeWrite: function (fileObj) {
+    return {
+      extension: 'png',
+      type: 'image/png'
+    };
+  },
+  path: "/Volumes/Public/Thumbs",
+})
+
+https://github.com/Gottox/node-pdfutils
+var pdfutils = require('pdfutils').pdfutils;
+pdfutils("document.pdf", function(err, doc) {
+    doc[0].asPNG({maxWidth: 100, maxHeight: 100}).toFile("firstpage.png");
+});
+
+*/
 /************************************
 
 TEMPORARY SINGLETON FOR LIB
