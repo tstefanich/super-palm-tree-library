@@ -15,26 +15,66 @@
 			<h1>Dropzone.js Example</h1>
 		</header>
 
-		<div>
+		
 			<form id="upload-widget" method="post" action="/upload" class="dropzone">
 				<div class="fallback">
 					<input name="file" type="file" />
-  			</div>
+  				</div>
 			</form>
-		</div>
 
-		<footer style="margin-top:500px;">
-			<p>This demo is designed to accompany <a href="http://www.sitepoint.com/ARTICLE-URL">this article</a>.</p>
-		</footer>
+<div id="previews">
+ <div id="template" class="file-row" >
+    <!-- This is used as the file preview template -->
+    <div>
+        <span class="preview"><img data-dz-thumbnail /></span>
+    </div>
+    <div>
+        <p class="name" data-dz-name></p>
+        <strong class="error text-danger" data-dz-errormessage></strong>
+    </div>
+    <div>
+        <p class="size" data-dz-size></p>
+        <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
+        </div>
+    </div>
+    <div>
+      <button class="btn btn-primary start" style="display:none">
+          <i class="glyphicon glyphicon-upload"></i>
+          <span>Start</span>
+      </button>
+      <button data-dz-remove class="btn btn-warning cancel" style="display:none">
+          <i class="glyphicon glyphicon-ban-circle"></i>
+          <span>Cancel</span>
+      </button>
+      <button data-dz-remove class="btn btn-danger delete" data-dz-remove>
+        <i class="glyphicon glyphicon-trash"></i>
+        <span>Delete</span>
+      </button>
+    </div>
+  </div>
+    </div>
 
 	</div>
   <script type="text/javascript" src="/jquery/dist/jquery.min.js"></script>    
   <script type="text/javascript" src="/dropzone/dist/dropzone.js"></script>    
   <script type="text/javascript">
+    // Get the template HTML and remove it from the doumenthe template HTML and remove it from the doument
+	var previewNode = document.querySelector("#template");
+	previewNode.id = "";
+	var previewTemplate = previewNode.parentNode.innerHTML;
+	previewNode.parentNode.removeChild(previewNode);
+
+	escapeFileName = function(text) {
+  		return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+	};
+
     Dropzone.options.uploadWidget = {  
 		  paramName: 'file',
-		  maxFilesize: 100, // MB		
-		  autoProcessQueue: true,  
+		  maxFilesize: 100, // MB	
+		  autoProcessQueue: true, 
+		  previewTemplate: previewTemplate, 
+		  previewsContainer: "#previews",
 		  dictDefaultMessage: 'Drag an pdf here to upload, or click to select one',
 		  headers: {
 			'x-csrf-token': document.querySelectorAll('meta[name=csrf-token]')[0].getAttributeNode('content').value,
@@ -48,36 +88,45 @@
 
 		  },
 		  init: function() {
+		  
 		      this.on("addedfile", function(file) {
 
-		        // Create the remove button
-		        var removeButton = Dropzone.createElement("<button>Remove file</button>");
-
-
-		        // Capture the Dropzone instance as closure.
-		        var _this = this;
-
-		        // Listen to the click event
-		        removeButton.addEventListener("click", function(e) {
-		          	// Make sure the button click doesn't submit the form:
-		          	e.preventDefault();
-		          	e.stopPropagation();
-	
+		     
+				this.on("totaluploadprogress", function(progress) {
+					//console.log(progress);
+					if(document.querySelector("#total-progress .progress-bar")){ //THIS WAS NEED BECAUSE THIS EVENT GETS TRIGGER ON REMOVEFILE BUT THE PROGRESS BAR IS NULL AT THAT POINT. 
+						document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+					};
+				});
+				this.on("sending", function(file) {
+				  // Show the total progress bar when upload starts
+				  document.querySelector("#total-progress").style.opacity = "1";
+				  // And disable the start button
+				  //file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
+				});
+				this.on("queuecomplete", function(progress) {
+				  document.querySelector("#total-progress").style.opacity = "0";
+				});
+				this.on("removedfile", function(file) {
+   					// Make sure the button click doesn't submit the form:
+		          	//e.preventDefault();
+		          	//e.stopPropagation();
+					
 		          	// Remove the file preview.
-		          	_this.removeFile(file);
+		          	//_this.removeFile(file);
 		          	// If you want to the delete the file on the server as well,
 		          	// you can do the AJAX request here.
 		          	var server_file = $(file.previewTemplate).children('.server_file').text();
 		          	console.log(server_file);
+
+
   					//alert(server_file);
   					// Do a post request and pass this path and use server-side language to delete the file
 					// ADD POPUP ARE YOU SURE YOU WANT TO DELETE///  					
   					$.post("http://localhost:8080/delete",{filePath: server_file}, function(data){});
-		        });
-
-		        // Add the button to the file preview element.
-		        file.previewElement.appendChild(removeButton);
-		      });
+     
+    			});
+    		});
 		    },
 		 	  
 		  /*init: function() {	    
@@ -93,7 +142,7 @@
 		  accept: function(file, done) {
 		  	console.log(file);
 		    done(); 
-		  }		  
+		  },		  
 		};	
   </script>
 
