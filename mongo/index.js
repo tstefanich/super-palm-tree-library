@@ -1,6 +1,28 @@
 require('shelljs/global');
 var util = require('util');
+var fs = require('fs');
 
+/*
+var pdfThumbnail = new FS.Store.FileSystem("thumbs", {
+  transformWrite: function(fileObj, readStream, writeStream) {
+    gm(readStream, fileObj.name() + '[0]').resize('100', '100').stream('png').pipe(writeStream);
+  },
+  beforeWrite: function (fileObj) {
+    return {
+      extension: 'png',
+      type: 'image/png'
+    };
+  },
+  path: "/Volumes/Public/Thumbs",
+})
+
+https://github.com/Gottox/node-pdfutils
+var pdfutils = require('pdfutils').pdfutils;
+pdfutils("document.pdf", function(err, doc) {
+    doc[0].asPNG({maxWidth: 100, maxHeight: 100}).toFile("firstpage.png");
+});
+
+*/
 /************************************
 
 TEMPORARY SINGLETON FOR LIB
@@ -82,6 +104,9 @@ var bodyParser = require('body-parser')
 app.use(express.static( __dirname + '/bower_components' ) );
 app.use(express.static(__dirname + '/views'));
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({
+  extended: true
+}))
 //app.engine('html', require('ejs').renderFile);
 app.engine( '.hbs', exphbs( { extname: '.hbs' } ) );
 app.set('view engine', '.hbs');
@@ -136,6 +161,9 @@ app.get("/search", function(req, res, next) {
  EXPRESS POST
 
 ************************************/
+app.post( '/delete', function( req, res ) {
+  removeFileFromServer(req);
+}); 
 
 app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 
@@ -176,7 +204,7 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
   var fileInfo = exec('pdfinfo ' + fileString).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
 
-  // Check to see if PDF has text
+
   var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo);
   if(pdfTitle == null){
     console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
@@ -348,8 +376,27 @@ function saveDocument(doc){
 	});
 }
 
+function clearSomeDocuments(searchTerm, callback) {
+  var query = searchTerm + '.pdf';
+  Document.remove({ title: query }, function (err) {
+    if (err) return handleError(err);
+    // removed!
+  });
 
+};
 
+function clearAllDocumentsFromDatabase(db, callback) {
+   Document.remove({}, function (err) {
+     if (err) return handleError(err);
+     // removed!
+   });
+};
+
+function removeFileFromServer(req){
+  var filePath = req.body.filePath;
+  fs.unlinkSync(filePath);
+  clearSomeDocuments(db,filePath)
+}
 
 app.listen( 8080, function() {  
   console.log( 'Express server listening on port 8080' );
