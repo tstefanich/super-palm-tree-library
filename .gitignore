@@ -38,6 +38,9 @@ db/
 done/
 todo/
 
+# ignore sqlite db file
+*.db
+
 # ignore uploads folder
 uploads/
 
