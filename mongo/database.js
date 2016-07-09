@@ -137,7 +137,7 @@ database.addFile = function(file, callback){
   // grab pdf info
   if(!which('pdfinfo')){
     return callback({
-      text : 'server missing dependency. Install Brew then type "brew install poppler"'
+      messagge : 'server missing dependency. Install Brew then type "brew install poppler"'
     }, null);
   }
 

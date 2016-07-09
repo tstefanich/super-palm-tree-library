@@ -98,7 +98,7 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 	database.addFile(req.file, function(err, response){
 	  	if(err){
 	  		return res.status( 422 ).json( {
-		      error : err.text
+		      error : err.message
 		    } );
 	  	} else {
 	  		return res.status( 200 ).send( response );

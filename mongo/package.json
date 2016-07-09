@@ -16,6 +16,7 @@
     "express-handlebars": "^3.0.0",
     "mongoose": "^4.4.6",
     "multer": "^1.1.0",
+    "node-schedule": "^1.1.1",
     "shelljs": "^0.6.0",
     "string.prototype.startswith": "^0.2.0"
   }
