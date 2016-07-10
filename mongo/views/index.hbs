@@ -14,6 +14,7 @@
 
     <!-- Bootstrap core CSS -->
     <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="text/javascript" src="/pdfjs-bower/dist/pdf.js"></script>
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <!--<link href="/bootstrap/dist/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">-->
@@ -52,6 +53,8 @@
     .item.list-group-item img{float:left;}
     #list{padding-left: 0;}
 </style>
+
+
   </head>
 
   <body>
@@ -102,7 +105,8 @@
           <div class="col col-md-4">Total Pages</div>
         </div>
         {{#each userlist}}
-            <div class="item list-group-item clearfix col-md-4">
+            <div data-pdf-file="{{_id}}.pdf" class="item item-content list-group-item clearfix col-md-4">
+              <div class="col col-md-12 image"></div>
               <div class="col col-md-4">{{_id}}</div>
               <div class="col col-md-4">----</div>
               <div class="col col-md-4">{{totalPages}}</div>
@@ -123,5 +127,104 @@
       $('#grid').click(function(){$('#products .item').removeClass('list-group-item clearfix').addClass('grid-group-item');});
     </script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+      // set the pdfjs worker source. not sure if PDFjs uses 'webworkers' API of HTML5
+      PDFJS.workerSrc = "/pdfjs-bower/dist/pdf.worker.js";
+
+      $(document).ready(function() {
+
+        // check for necessary features
+        //featureCheck();
+
+        var PDF_FILES_DIRECTORY = "/done/";
+        // this demo is currenlty put as gist which does not support directories
+        // these files should exist in the given path to display correctly
+
+    
+
+        $('.item-content').each(function( index ) {
+            var CURRENT_PDF = $(this).attr('data-pdf-file');
+            console.log(CURRENT_PDF);
+            PDFJS.getDocument( PDF_FILES_DIRECTORY + CURRENT_PDF ).then( function (pdf) {
+                          console.log(PDF_FILES_DIRECTORY + $(this).attr('data-pdf-details'));
+
+                pdf.getPage(1).then( function (page) {
+
+                    var viewport = page.getViewport(0.5);
+                    // PDF.js returns a promise when it gets a particular page from the pdf object
+                    // A canvas element is used to render the page and convert into an image thumbnail
+                    // if single canvas is used, the content gets overridden when PDF.js promises resolve for subsequent files
+                    // so a dedicated canvas element is created for rendering a thumbnail for each pdf
+                    // the canvas element is discarded once the thumbnail is created.
+                    var canvas = document.createElement('canvas');
+                    var ctx = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    var renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport
+                    };
+
+                    page.render(renderContext).then( function() {
+
+                        //set to draw behind current content
+                        ctx.globalCompositeOperation = "destination-over";
+                        //set background color
+                        ctx.fillStyle = "#fff";
+                        //draw on entire canvas
+                        ctx.fillRect( 0, 0, canvas.width, canvas.height );
+                        // create an img from the canvas which contains the page contents
+                        var img_src = canvas.toDataURL();
+                        var $img = $("<img>")
+                                        .attr("src", img_src);
+
+                        var file_details = {
+                            "name": pdf_file,
+                            "pages": pdf.pdfInfo.numPages
+                        };
+
+                        var $thumb = $("<div>")
+                                        .attr("class", "thumb")
+                                        .attr("data-pdf-details", JSON.stringify(file_details))
+                                        .append( 
+                                            $("<span>")
+                                                .attr("class", 'close')
+                                                .html('&times;')
+                                                .click( function () {
+                                                    var details = $(this).parent().data("pdf-details");
+                                                    alert("Remove " + details.name + " !? ");
+                                                } ) 
+                                        )
+                                        .append( $("<div>").attr("class", 'info').text(pdf_file) )
+                                        .append($img)
+                                        .click( function () {
+                                            CURRENT_FILE = $(this).data("pdf-details");
+                                            $info_name.text(CURRENT_FILE.name);
+                                            $info_pages.text(CURRENT_FILE.pages);
+                                            $(".thumb").removeClass("current");
+                                            $(this).addClass("current")
+                                        } );
+
+                        $thumb.appendTo("#thumbnail").click();
+                        // we have created a thumbnail and rendered the img from the canvas
+                        // discard the temporary canvas created for rendering this thumbnail
+                        canvas.remove();                    
+                        //$(canvas).remove();
+
+                    });
+
+              }); // end of getPage
+
+            }); // end of getDocument
+
+        }); // end of each
+
+      }); // end of doc ready
+
+
+</script>
+
   </body>
 </html>
