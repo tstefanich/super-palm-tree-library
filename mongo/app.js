@@ -18,7 +18,7 @@ var app = express();
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, __dirname + '/uploads/');
+    cb(null, __dirname + '/data/uploads/');
   }
 });
 
@@ -143,3 +143,52 @@ function collapsePagesIntoBooks(data)
 
 
 module.exports = app;
+
+
+
+var CronJob = require('cron').CronJob;
+//var //database = require('../database.js');
+//var elasticsearch = require('elasticsearch');
+//var client = new elasticsearch.Client();
+var fs = require('fs');
+//var tika = require('tika');
+var curFile = '';
+
+
+var job = new CronJob({
+    cronTime: '0 * * * * *',
+    onTick: function() {
+    fs.readdir("./data",function(error,files){
+        if(error) console.log(error);
+          else{
+            for(var i in files){
+                if(/.+\.pdf/i.test(files[i])){
+                    curFile = files[i];
+                      //tika.extract(files[i], function(err, text, meta) {
+                        database.addFileCron(curFile, function(err, response){
+
+                            if(err){
+                              return res.status( 422 ).json( {
+                                error : err.message
+                              } );
+                            } else {
+                              //createDocument(text, meta);
+
+                            }
+                        });  
+                        
+                      //});
+                  }
+              }
+          }
+      });
+  },
+  start: false
+});
+job.start();
+
+
+
+
+
+
