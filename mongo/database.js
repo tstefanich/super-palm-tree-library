@@ -151,6 +151,8 @@ database.addFile = function(file, callback){
   fileString = fileString.replace('#','-');
   fileString = fileString.replace('%','-');
   fileString = fileString.replace('$','-');
+  fileString = fileString.replace(/ /g,"-");
+
   // added this as a temp solution was not able to do get request on pdf files with periods in the name.
   //fileString = fileString.replace('.','-');
 
