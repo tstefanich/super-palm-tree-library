@@ -31,7 +31,9 @@
     <style>
     body {padding-top: 50px;}
     .row {padding-top: 15px; padding-bottom: 15px; }
-    .image img {max-height: 230px;}
+    .image img {max-width: 170px;max-height: 170px; width: auto;height: auto;margin: 0 auto;}
+
+
     /******************
 
     Grid List View
@@ -106,11 +108,11 @@
           <div class="col col-md-4">Total Pages</div>
         </div>
         {{#each userlist}}
-            <div data-pdf-file="{{_id}}.pdf" class="item item-content list-group-item clearfix col-md-4">
+            <div data-pdf-file="{{_id}}.pdf" class="item item-content list-group-item clearfix col-xs-4 col-sm-4 col-md-4">
               <div class="col col-md-12 image"></div>
-              <div class="col col-md-4">{{_id}}</div>
-              <div class="col col-md-4">----</div>
-              <div class="col col-md-4">{{totalPages}}</div>
+              <div class="col col-xs-4 col-sm-4 col-md-4">{{_id}}</div>
+              <div class="col col-xs-4 col-sm-4 col-md-4">----</div>
+              <div class="col col-xs-4 col-sm-4 col-md-4">{{totalPages}}</div>
             </div>
         {{/each}}
       </div>
