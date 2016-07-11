@@ -31,8 +31,9 @@ require( 'string.prototype.startswith' );
 
 ************************************/
 
-app.use(express.static( __dirname + '/bower_components' ) );
+app.use(express.static(__dirname + '/bower_components' ) );
 app.use(express.static(__dirname + '/views'));
+app.use(express.static(__dirname + '/data'));
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({
   extended: true
@@ -144,7 +145,11 @@ function collapsePagesIntoBooks(data)
 
 module.exports = app;
 
+/************************************
 
+TEMPORARY FUNCTIONS FOR CRON INDEXING
+
+************************************/
 
 var CronJob = require('cron').CronJob;
 //var //database = require('../database.js');
@@ -158,7 +163,7 @@ var curFile = '';
 var job = new CronJob({
     cronTime: '0 * * * * *',
     onTick: function() {
-    fs.readdir("./data",function(error,files){
+    fs.readdir("./data/uploads",function(error,files){
         if(error) console.log(error);
           else{
             for(var i in files){

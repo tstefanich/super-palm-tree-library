@@ -31,6 +31,7 @@
     <style>
     body {padding-top: 50px;}
     .row {padding-top: 15px; padding-bottom: 15px; }
+    .image img {max-height: 230px;}
     /******************
 
     Grid List View
@@ -147,7 +148,6 @@
             var CURRENT_PDF = $(this).attr('data-pdf-file');
             console.log(CURRENT_PDF);
             PDFJS.getDocument( PDF_FILES_DIRECTORY + CURRENT_PDF ).then( function (pdf) {
-                          console.log(PDF_FILES_DIRECTORY + $(this).attr('data-pdf-details'));
 
                 pdf.getPage(1).then( function (page) {
 
@@ -177,37 +177,15 @@
                         ctx.fillRect( 0, 0, canvas.width, canvas.height );
                         // create an img from the canvas which contains the page contents
                         var img_src = canvas.toDataURL();
-                        var $img = $("<img>")
-                                        .attr("src", img_src);
+                        var $img = $("<img>").attr("src", img_src);
 
                         var file_details = {
-                            "name": pdf_file,
+                            "name": CURRENT_PDF,
                             "pages": pdf.pdfInfo.numPages
                         };
 
-                        var $thumb = $("<div>")
-                                        .attr("class", "thumb")
-                                        .attr("data-pdf-details", JSON.stringify(file_details))
-                                        .append( 
-                                            $("<span>")
-                                                .attr("class", 'close')
-                                                .html('&times;')
-                                                .click( function () {
-                                                    var details = $(this).parent().data("pdf-details");
-                                                    alert("Remove " + details.name + " !? ");
-                                                } ) 
-                                        )
-                                        .append( $("<div>").attr("class", 'info').text(pdf_file) )
-                                        .append($img)
-                                        .click( function () {
-                                            CURRENT_FILE = $(this).data("pdf-details");
-                                            $info_name.text(CURRENT_FILE.name);
-                                            $info_pages.text(CURRENT_FILE.pages);
-                                            $(".thumb").removeClass("current");
-                                            $(this).addClass("current")
-                                        } );
-
-                        $thumb.appendTo("#thumbnail").click();
+                        var $thumb = $("div[data-pdf-file='"+CURRENT_PDF+"'] div.image").append($img);
+                        //$thumb.appendTo
                         // we have created a thumbnail and rendered the img from the canvas
                         // discard the temporary canvas created for rendering this thumbnail
                         canvas.remove();                    
