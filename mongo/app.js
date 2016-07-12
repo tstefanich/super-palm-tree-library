@@ -96,15 +96,15 @@ app.get(/(.*\.pdf)\/([0-9]+).png$/i, function (req, res) {
     var pageNumber = req.params[1];
  
     var PDFImage = require("pdf-image").PDFImage;
-    var pdfImage2 = new PDFImage('data/'+pdfPath, { outputDirectory : __dirname+'/data/thumbnails/' });
+    var pdfImage2 = new PDFImage('data/'+pdfPath, { convertOptions: {'-density': '18'}, convertExtension : 'png', outputDirectory : __dirname+'/data/thumbnails/' });
 
 
 
     pdfImage2.convertPage(pageNumber).then(function (imagePath) {
 
-    //This part moves image from Done Folder to Thumbnail folder
-    image = imagePath.split('/').pop();
-    mv(__dirname+'/'+imagePath, __dirname+'/data/thumbnails/'+image);
+      //This part moves image from Done Folder to Thumbnail folder
+      image = imagePath.split('/').pop();
+      mv(imagePath, __dirname+'/data/thumbnails/'+image);
 
       //Send File to browser 
       //res.sendFile(imagePath, { root : __dirname});
