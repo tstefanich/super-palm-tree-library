@@ -31,7 +31,9 @@ var database = {
       console.log('database connection successful');
 
       self.docSchema = mongoose.Schema({
+        pdf: String,
         title: String,
+        author: String,
         page: Number,
         text: String
       });
@@ -242,6 +244,7 @@ database.addFileCron = function(file, callback){
   console.log('author' + pdfAuthor);
   if(pdfAuthor == null){
     console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
+    pdfAuthor = '--';
   }
 
   // Check to see if PDF has metadata has Title, Author, (maybe these too --- subject, keywords)
@@ -261,7 +264,9 @@ database.addFileCron = function(file, callback){
     var pageText = exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' -',{silent:true}).stdout;
     // then I would pass it to mongo
     var page = new this.Document({
+      pdf: fileString,
       title: folderString,
+      author: pdfAuthor,
       page: p,
       text: pageText
     });
@@ -284,6 +289,20 @@ database.addFileCron = function(file, callback){
   return callback(null, file);
 }
 
+
+
+database.saveTitle = function (searchTerm, newTitle){
+  this.Document.update(
+    { _id: searchTerm },
+    { $set:
+      {
+        title: newTitle
+      }
+    }, function (err) {
+      if (err) return handleError(err);
+      // updated!
+    });
+}
 
 database.saveDocument = function (doc){
 	doc.save(function (err, doc) {
@@ -317,7 +336,12 @@ database.removeFileFromServer = function (req){
 database.dbInfo = function (callback) {
   database.Document.aggregate(
     { $group: 
-      { _id: '$title',totalPages: { $sum: 1 } } 
+      { _id: '$title',
+        totalPages: { $sum: 1 },
+        title: { $addToSet: "$title"  },
+        pdf: { $addToSet: "$pdf"  },
+        author: { $addToSet: "$author"  }
+      } 
     },
     function (err, results) {
       if (err) return handleError(err);

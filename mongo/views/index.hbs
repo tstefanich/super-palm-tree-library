@@ -107,11 +107,11 @@
           <div class="col col-md-4">Author</div>
           <div class="col col-md-4">Total Pages</div>
         </div>
-        {{#each userlist}}
-            <div data-pdf-file="{{_id}}.pdf" class="item item-content list-group-item clearfix col-xs-4 col-sm-4 col-md-4">
-              <div class="col col-md-12 image"></div>
-              <div class="col col-xs-4 col-sm-4 col-md-4">{{_id}}</div>
-              <div class="col col-xs-4 col-sm-4 col-md-4">----</div>
+        {{#each books}}
+            <div data-pdf-file="{{pdf}}" class="item item-content list-group-item clearfix col-xs-4 col-sm-4 col-md-4">
+              <div class="col col-md-12 image"><img src="/done/{{pdf}}/0.png"></div>
+              <div class="col col-xs-4 col-sm-4 col-md-4">{{title}}</div>
+              <div class="col col-xs-4 col-sm-4 col-md-4">{{author}}</div>
               <div class="col col-xs-4 col-sm-4 col-md-4">{{totalPages}}</div>
             </div>
         {{/each}}
@@ -130,81 +130,6 @@
       $('#grid').click(function(){$('#products .item').removeClass('list-group-item clearfix').addClass('grid-group-item');});
     </script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
-
-<script type="text/javascript">
-      // set the pdfjs worker source. not sure if PDFjs uses 'webworkers' API of HTML5
-      PDFJS.workerSrc = "/pdfjs-bower/dist/pdf.worker.js";
-
-      $(document).ready(function() {
-
-        // check for necessary features
-        //featureCheck();
-
-        var PDF_FILES_DIRECTORY = "/done/";
-        // this demo is currenlty put as gist which does not support directories
-        // these files should exist in the given path to display correctly
-
-    
-
-        $('.item-content').each(function( index ) {
-            var CURRENT_PDF = $(this).attr('data-pdf-file');
-            console.log(CURRENT_PDF);
-            PDFJS.getDocument( PDF_FILES_DIRECTORY + CURRENT_PDF ).then( function (pdf) {
-
-                pdf.getPage(1).then( function (page) {
-
-                    var viewport = page.getViewport(0.5);
-                    // PDF.js returns a promise when it gets a particular page from the pdf object
-                    // A canvas element is used to render the page and convert into an image thumbnail
-                    // if single canvas is used, the content gets overridden when PDF.js promises resolve for subsequent files
-                    // so a dedicated canvas element is created for rendering a thumbnail for each pdf
-                    // the canvas element is discarded once the thumbnail is created.
-                    var canvas = document.createElement('canvas');
-                    var ctx = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    var renderContext = {
-                        canvasContext: ctx,
-                        viewport: viewport
-                    };
-
-                    page.render(renderContext).then( function() {
-
-                        //set to draw behind current content
-                        ctx.globalCompositeOperation = "destination-over";
-                        //set background color
-                        ctx.fillStyle = "#fff";
-                        //draw on entire canvas
-                        ctx.fillRect( 0, 0, canvas.width, canvas.height );
-                        // create an img from the canvas which contains the page contents
-                        var img_src = canvas.toDataURL();
-                        var $img = $("<img>").attr("src", img_src);
-
-                        var file_details = {
-                            "name": CURRENT_PDF,
-                            "pages": pdf.pdfInfo.numPages
-                        };
-
-                        var $thumb = $("div[data-pdf-file='"+CURRENT_PDF+"'] div.image").append($img);
-                        //$thumb.appendTo
-                        // we have created a thumbnail and rendered the img from the canvas
-                        // discard the temporary canvas created for rendering this thumbnail
-                        canvas.remove();                    
-                        //$(canvas).remove();
-
-                    });
-
-              }); // end of getPage
-
-            }); // end of getDocument
-
-        }); // end of each
-
-      }); // end of doc ready
-
-
-</script>
 
   </body>
 </html>

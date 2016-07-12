@@ -10,6 +10,8 @@ var multer   =  require( 'multer' );
 var bodyParser = require('body-parser');
 var util = require('util');
 
+
+
 // load in database module
 var database = require('./database.js');
 database.init();
@@ -55,7 +57,7 @@ app.get( '/', function( req, res, next ){
 	//     { _id: '$title', totalPages: { $sum: 1 } } 
 	// }
 	database.dbInfo(function(results){
-		return res.render('index', {'userlist' : results});
+		return res.render('index', {'books' : results});
 	});
     //Document.find({}, {}, function(e, docs) { // .distict vs .find
       //var books = collapsePagesIntoBooks(docs);
@@ -82,6 +84,38 @@ app.get("/search", function(req, res, next) {
     return res.render('search');
   }
 });
+
+/************************************
+
+ EXPRESS GET for PDF images
+
+************************************/
+
+app.get(/(.*\.pdf)\/([0-9]+).png$/i, function (req, res) {
+    var pdfPath = req.params[0];
+    var pageNumber = req.params[1];
+ 
+    var PDFImage = require("pdf-image").PDFImage;
+    var pdfImage2 = new PDFImage('data/'+pdfPath, { outputDirectory : __dirname+'/data/thumbnails/' });
+
+
+
+    pdfImage2.convertPage(pageNumber).then(function (imagePath) {
+
+    //This part moves image from Done Folder to Thumbnail folder
+    image = imagePath.split('/').pop();
+    mv(__dirname+'/'+imagePath, __dirname+'/data/thumbnails/'+image);
+
+      //Send File to browser 
+      //res.sendFile(imagePath, { root : __dirname});
+      res.sendFile('data/thumbnails/'+image, { root : __dirname});
+    }, function (err) {
+      res.status(500).json( {
+          error : err.message
+        } );
+    });
+  });
+
 
 /************************************
 
@@ -141,7 +175,6 @@ function collapsePagesIntoBooks(data)
   }
   return books;
 }
-
 
 module.exports = app;
 
