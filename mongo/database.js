@@ -130,29 +130,45 @@ database.searchDocs = function (keyword, callback)
 
 
 
-database.searchDocsTrash = function (keyword, callback)
+database.searchDocsTrash = function (pdfs, callback)
 {
-  console.time('searchTime');
-  var items = [];
-  this.Document.find(
-        { $text : { $search : keyword } }, 
-        { score : { $meta: "textScore" } }
-    )
-    .sort({ score : { $meta : 'textScore' } })
-    .exec(function(err, results) {
-      // console.log(results);
-    if(results.length > 0) {
-      for (var nextResult of results){
-        items.push(nextResult);
-        console.log(nextResult.title + ' : ' + nextResult.page + ' : ' + nextResult.text);
-      }
-    } else {
-      console.log('no results');
-    }
-    console.timeEnd('searchTime');
-    callback(items);
-    });
+//  console.log('searchDocsTrash');
+//    //['NS2016-titles-2015-06-08_1PM.pdf','OCR-mediumBook-English.pdf']
+//    this.Document.find( { pdf: { $in: ['NS2016-titles-2015-06-08_1PM.pdf','OCR-mediumBook-English.pdf'] } } ,
+//    function (err, results) {
+//      console.log(err);
+//      if (err) return console.error(err);
+//      console.log(results);
+//      callback(results);
+//    } )
+//
 
+this.Document.aggregate(
+    { $group: 
+      { _id: '$title',
+        totalPages: { $sum: 1 },
+        pdf: { $addToSet: "$pdf"  },
+        title: { $addToSet: "$title"  },
+        author: { $addToSet: "$author"  },
+        year: { $addToSet: "$year"  }
+      } 
+    },{
+        $match: {  
+          $or: [
+          { pdf: 
+            { 
+              $in: pdfs
+            } 
+          }
+          ]
+        }  
+    },
+    function (err, results) {
+      if (err) return console.log(err);
+      console.log(results);
+      callback(results);
+    }
+  );
 }
 
 database.addFile = function(file, callback){
@@ -344,7 +360,7 @@ database.saveDocument = function (doc){
 
 database.clearSomeDocuments = function (searchTerm, callback) {
   var query = searchTerm + '.pdf';
-  this.Document.remove({ title: query }, function (err) {
+  this.Document.remove({ pdf: query }, function (err) {
     if (err) return handleError(err);
     // removed!
   });

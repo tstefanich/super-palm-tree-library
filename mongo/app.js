@@ -72,12 +72,17 @@ app.get( '/trash', function( req, res, next ){
               console.log(curFile);    
             }
           }
+
+          database.searchDocsTrash(files, function(results){
+            console.log(results);
+            return res.render( 'trash',{'books' : results} );
+          });
+
         }
     });
-   // database.dbInfo(function(results){
-   //     return res.render( 'trash',{'books' : results} );
-   // });
-   return res.render( 'trash');
+
+
+    //return res.render( 'trash');
 
 });
 
