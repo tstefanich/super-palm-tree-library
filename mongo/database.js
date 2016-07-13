@@ -4,6 +4,9 @@
 
 ************************************/
 
+//ensureIndex!!!
+//http://stackoverflow.com/questions/21417711/search-multiple-fields-for-multiple-values-in-mongodb
+
 // NOTES: probably make this into a singleton-like thing (don't want multiple database inits)
 // also potentially switch to a constructor thing and add the init stuff to that
 
@@ -34,6 +37,7 @@ var database = {
         pdf: String,
         title: String,
         author: String,
+        year: Number,
         page: Number,
         text: String
       });
@@ -103,6 +107,33 @@ database.searchDocs = function (keyword, callback)
  //    callback(items);
 	// });
 
+  this.Document.find(
+        { $text : { $search : keyword } }, 
+        { score : { $meta: "textScore" } }
+    )
+    .sort({ score : { $meta : 'textScore' } })
+    .exec(function(err, results) {
+      // console.log(results);
+    if(results.length > 0) {
+      for (var nextResult of results){
+        items.push(nextResult);
+        console.log(nextResult.title + ' : ' + nextResult.page + ' : ' + nextResult.text);
+      }
+    } else {
+      console.log('no results');
+    }
+    console.timeEnd('searchTime');
+    callback(items);
+    });
+
+}
+
+
+
+database.searchDocsTrash = function (keyword, callback)
+{
+  console.time('searchTime');
+  var items = [];
   this.Document.find(
         { $text : { $search : keyword } }, 
         { score : { $meta: "textScore" } }
@@ -338,9 +369,10 @@ database.dbInfo = function (callback) {
     { $group: 
       { _id: '$title',
         totalPages: { $sum: 1 },
-        title: { $addToSet: "$title"  },
         pdf: { $addToSet: "$pdf"  },
-        author: { $addToSet: "$author"  }
+        title: { $addToSet: "$title"  },
+        author: { $addToSet: "$author"  },
+        year: { $addToSet: "$year"  }
       } 
     },
     function (err, results) {
