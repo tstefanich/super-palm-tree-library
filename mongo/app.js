@@ -43,17 +43,6 @@ app.use(bodyParser.json());       // to support JSON-encoded bodies
 //app.engine('html', require('ejs').renderFile);
 
 // Create `ExpressHandlebars` instance with a default layout.
-var hbs = exphbs.create({
-    defaultLayout: 'main',
-    //helpers      : helpers,
-
-    // Uses multiple partials dirs, templates in "shared/templates/" are shared
-    // with the client-side of the app (see below).
-    partialsDir: [
-        'views/partials/'
-    ]
-});
-
 app.engine( '.hbs', exphbs( { extname: '.hbs' } ) );
 app.set('view engine', '.hbs');
 
