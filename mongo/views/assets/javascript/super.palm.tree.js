@@ -12,8 +12,8 @@ $(document).ready(function(){
     });
     
     $(".menu-item-16358 input").blur(function() {
-        $(this).val("");
-        $(".menu-item-16358").removeClass("expanded");
+       // $(this).val("");
+       // $(".menu-item-16358").removeClass("expanded");
     });
  });
 
@@ -38,6 +38,9 @@ $(document).ready(function(){
 
 
     $(window).load(function(){
+
+
+    if (window.location.href.indexOf('grid') > -1) {
       /*==========================================
            Match All Title Heights in a row  
       ===========================================*/
@@ -77,7 +80,7 @@ $(document).ready(function(){
         $(this).css('height',currentHeighest+"px");
       }); 
 
-
+}
 
     });
 
@@ -86,8 +89,12 @@ $(document).ready(function(){
     /// THIS DOES NOT REALLY WORK>>>> BUT NOT IMPORTANT RIGhT NOW
     /// ALthough this code works for windows load just fine
     $(window).resize(function(){
+        if (window.location.href.indexOf('grid') > -1) {
+
+
+
       console.log('test');
-            /*==========================================
+     /*==========================================
            Match All Title Heights in a row  
       ===========================================*/
      
@@ -133,8 +140,10 @@ $(document).ready(function(){
             $(this).css('height',currentHeighest+"px");
             console.log('made it');
           }); 
-     
 
+
+
+    }
     });
 
 
