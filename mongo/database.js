@@ -374,10 +374,28 @@ database.clearAllDocumentsFromDatabase = function (db, callback) {
    });
 };
 
-database.removeFileFromServer = function (req){
+database.removeFileFromServer = function (req, folder){
   var filePath = req.body.filePath;
+  var folder = req.body.folder;
+
+  //Fix to allow this function to work for both upload && trash page
+  file = req.body.filePath.split('/').pop()
+  filePath = __dirname + '/data/'+folder+'/' + file;
+  
+  // Delete file
   fs.unlinkSync(filePath);
+
+  // Remove from database
   this.clearSomeDocuments(filePath);
+}
+
+database.restoreFile = function (req, callback){
+  var filePath = req.body.filePath;
+  var folder = req.body.folder;
+  console.log(filePath);
+  var fileString = filePath.split('/').pop();
+  mv(__dirname+'/data/'+folder+'/'+filePath, __dirname+'/data/done/'+fileString);
+  
 }
 
 database.dbInfo = function (callback) {
