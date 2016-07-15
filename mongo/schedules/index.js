@@ -1,11 +1,26 @@
 // require some modules
 var fs = require('fs');
 
-function index(dir){
+function index(){
 
 	var core = {
 		checkDirectory: function(dir){
-			
+			var promise = new Promise( function(resolve, reject){
+				fs.readdir(dir, (err, files) => {
+					if(err){
+						reject(err.message);
+					} else {
+						console.log(`found ${files.length} files`);
+						for(file in files){
+							console.log(file);
+							// do something with file
+
+							// update database?
+						}
+						resolve(files);
+					}
+				});
+			});
 			return promise;
 		},
 		exit: function(){
@@ -21,25 +36,6 @@ function index(dir){
 	}
 }
 
-
-
-function checkDirectory(dir) {
-	fs.readdir(dir, (err, files) => {
-		if(err){
-			reject(err.message);
-		} else {
-			console.log(`found ${files.length} files`);
-			for(file in files){
-				console.log(file);
-				// do something with file
-
-				// update database?
-			}
-			resolve(files);
-		}
-	});
-}
-
 function indexFiles(files){
 	console.log(`indexing ${files.length} files`);
 }
@@ -47,9 +43,10 @@ function indexFiles(files){
 process.on('message', (m) => { 
 	if(m.index){
 		if(typeof m.dir != 'undefined') {
-			p1 = new Promise((resolve, reject) => checkDirectory(m.dir));
-			p1.then((results) => indexFiles(results));
-			p1.catch((err) => console.log(err.message));
+
+			index()
+				.areThereFilesIn(m.dir)
+				.then((results) => indexFiles(results),(err) => console.log(err.message));
 			
 		} else {
 			console.log('please specify a directort for attribute "dir"');
