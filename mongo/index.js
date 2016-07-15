@@ -1,16 +1,38 @@
-// var app = require('./app.js');
+// Remember to do this stuff::
 
-/*
-
-Schedules will go here for now, if needed we can put them in a schedule.js file
-
-*/
+// finish init db, then fix any issues with having db at this level instead of at app.js, also probably need to pass db to app.js,, then set up indexing child process schedule,, probably need to fix some stuff with indexFiles.js (I'd like to use it like start().then().then() instead of nested thens)
 
 var schedule = require('node-schedule');
-//var cp = require('child_process');
+var cp = require('child_process');
 
-// for testing, run this every 30 sec, might be more efficient to leave child_process running and
-// schedule commands for the process to execute some code
+var children = [];
+
+// load in database module
+var database = require('./database.js');
+// when db has init, pass to app and setup scheduler
+database.init()
+    .then((db) => {
+
+        var app = require('./app.js').app(db);
+
+        var index = cp.fork(__dirname + '/schedules/indexFiles.js');
+
+        index.on('message', (response) => console.log(response));
+        index.on('close', (code) => console.log(`index exited w/ code ${code}`));
+
+        var indexingSchedule = schedule.scheduleJob('10 * * * *', () => {
+            index.send({
+                index : true, 
+                dir : './data/uploads'
+            })
+        });
+
+        children.push(index); // store any child processes for later
+
+        // app.listen( 8080, function() {  
+        //   console.log( 'Express server listening on port 8080' );
+        // });
+    }); 
 
 
 var j = schedule.scheduleJob('30 * * * * *', function(){
@@ -25,28 +47,7 @@ var j = schedule.scheduleJob('30 * * * * *', function(){
 // });
 
 
-
-var children = [];
-
-var index = cp.fork(__dirname + '/schedules/index.js');
-
-index.on('message', (response) => console.log(response));
-index.on('close', (code) => console.log(`index exited w/ code ${code}`));
-
-var indexingSchedule = schedule.scheduleJob('10 * * * * *', () => {
-	index.send({index: true, dir: './unindexed-files'})
-
-});
-
-children.push(index); // store any child processes for later
-
-// app.listen( 8080, function() {  
-//   console.log( 'Express server listening on port 8080' );
-// });
-
-
-
-// dealing with exit now that we've got children
+// dealing with exit since we've got children
 function exitHandler(options, err) {
 
     if (options.cleanup) {
