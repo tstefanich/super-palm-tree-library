@@ -1,0 +1,314 @@
+/* English */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Space Mono'), local('SpaceMono-Regular'), url(fonts/SpaceMono-Regular.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Space Mono'), local('SpaceMono-Regular'), url(fonts/latin-ext-SpaceMono-Regular.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Space Mono'), local('SpaceMono-Regular'), url(fonts/latin-SpaceMono-Regular.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* english */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Space Mono Bold'), local('SpaceMono-Bold'), url(fonts/SpaceMono-Bold.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Space Mono Bold'), local('SpaceMono-Bold'), url(fonts/latin-ext-SpaceMono-Bold.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Space Mono Bold'), local('SpaceMono-Bold'), url(fonts/latin-SpaceMono-Bold.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* English */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Space Mono Italic'), local('SpaceMono-Italic'), url(fonts/SpaceMono-Regular-italic.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Space Mono Italic'), local('SpaceMono-Italic'), url(fonts/latin-ext-SpaceMono-Regular-italic.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Space Mono Italic'), local('SpaceMono-Italic'), url(fonts/latin-SpaceMono-Regular-italic.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Space Mono Bold Italic'), local('SpaceMono-BoldItalic'), url(fonts/SpaceMono-Bold-italic.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Space Mono Bold Italic'), local('SpaceMono-BoldItalic'), url(fonts/latin-ext-SpaceMono-Bold-italic.woff2) format('woff2');
+  unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Space Mono Bold Italic'), local('SpaceMono-BoldItalic'), url(fonts/latin-SpaceMono-Bold-italic.woff22) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}    
+
+
+
+    body {
+        padding-top: 50px;
+        font-family: 'Space Mono', monospace, helvetica, sans-serif;
+        background: #f8f8f8;
+    }
+    .row {padding-top: 15px; padding-bottom: 15px; }
+    .container{
+        width: 100%;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    /******************
+
+    Navigation
+
+    *******************/
+    nav.navbar-fixed-top{
+        border-bottom: 3px solid #000;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    nav.navbar-fixed-top .container{
+        width: 100%;
+        padding: 0;
+    }
+    .navbar-default .navbar-nav>li>a {
+        color: #000;
+    }
+    .navbar {
+        min-height: 43px;
+    }
+    .navbar-nav>li>a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .navbar-toggle {
+        margin-top: 4px;
+        margin-right: 5px;
+        margin-bottom: 0px; 
+        background-color: transparent;
+        background-image: none;
+        border: 0px solid transparent;
+    }
+    .navbar-default .navbar-toggle:focus, .navbar-default .navbar-toggle:hover{
+        background-color: transparent;
+    }
+    .navbar-default .navbar-toggle .icon-bar {
+       background-color: #000;
+    }
+
+    #products .item.list-group-item.title-headers{
+        font-weight: bold;
+        padding-top: 0;
+    }
+
+    /******************
+
+    List View
+
+    *******************/
+
+
+    #products .item.list-group-item .image{
+        padding: 0;
+    }
+ 
+    #products .item.list-group-item
+    {
+        float: none;
+        width: 100%;
+        background-color:transparent;
+        border:0;
+        border-bottom:1px dotted grey;
+        padding: 10px 0px;
+    }
+    #products .item.list-group-item .image{
+        padding: 0;
+        -webkit-transform-style: preserve-3d;
+        -moz-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+    }
+    #products .item.list-group-item .image img{
+        width: 40%;
+        background-color: white;
+        height: auto;
+        border:1px solid #f1f1f1;
+        margin: 0 auto;
+        position: relative;
+        //top: 50%;
+        //transform: translateY(-50%);
+        text-align: center;
+        display: block;
+    }
+
+
+    /******************
+
+    Grid List View
+
+    *******************/
+    #products.grid{
+        margin-left: -7.5px;
+        margin-right: -7.5px;
+    }
+    #products.grid .item{
+        padding: 7.5px;
+        
+        margin-bottom: 25px;
+    }
+    #products.grid .item .title{
+        padding: 0;
+        font-size: 10px;
+        padding-top:10px;
+        border-top: 1px dotted #000;
+        margin-top:10px;
+        font-weight: bold;
+    }
+    #products.grid .item .image{
+        padding: 0;
+        -webkit-transform-style: preserve-3d;
+        -moz-transform-style: preserve-3d;
+        transform-style: preserve-3d;
+    }
+    #products.grid .item .image img{
+        width: 100%;
+        background-color: white;
+        height: auto;
+        border:1px solid #f1f1f1;
+        margin: 0 auto;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    #products .item.grid-group-item:first-child{display:none;}
+    #products .item.grid-group-item .col{float: none;width:100%;}
+    #products .item.grid-group-item .col:last-child{float: none;width:100%;border-bottom:1px dotted grey;padding-bottom: 15px;}
+    #products .item.grid-group-item { padding-top:15px;}
+    .item.list-group-item img{
+        //float:left;
+    }
+    #list{padding-left: 0;}
+
+
+
+
+/*==================================================
+=            Bootstrap 3 Media Queries             =
+==================================================*/
+
+
+
+
+    /*==========  Mobile First Method  ==========*/
+
+    /* Custom, iPhone Retina */ 
+    @media only screen and (min-width : 320px) {
+        
+    }
+
+    /* Extra Small Devices, Phones */ 
+    @media only screen and (min-width : 480px) {
+
+    }
+
+    /* Small Devices, Tablets */
+    @media only screen and (min-width : 768px) {
+
+    }
+
+    /* Medium Devices, Desktops */
+    @media only screen and (min-width : 992px) {
+
+    }
+
+    /* Large Devices, Wide Screens */
+    @media only screen and (min-width : 1200px) {
+
+    }
+
+
+
+    /*==========  Non-Mobile First Method  ==========*/
+
+    /* Large Devices, Wide Screens */
+    @media only screen and (max-width : 1200px) {
+
+    }
+
+    /* Medium Devices, Desktops */
+    @media only screen and (max-width : 992px) {
+
+    }
+
+    /* Small Devices, Tablets */
+    @media only screen and (max-width : 768px) {
+        #list {
+            padding-left: 15px; 
+        }
+    }
+
+    /* Extra Small Devices, Phones */ 
+    @media only screen and (max-width : 480px) {
+        #list {
+            padding-left: 15px; 
+        }
+    }
+
+    /* Custom, iPhone Retina */ 
+    @media only screen and (max-width : 320px) {
+        
+    }
+
+
+    

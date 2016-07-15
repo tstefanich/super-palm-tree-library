@@ -10,6 +10,8 @@ var multer   =  require( 'multer' );
 var bodyParser = require('body-parser');
 var util = require('util');
 
+
+
 // load in database module
 var database = require('./database.js');
 database.init();
@@ -18,7 +20,7 @@ var app = express();
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, __dirname + '/uploads/');
+    cb(null, __dirname + '/data/uploads/');
   }
 });
 
@@ -31,8 +33,9 @@ require( 'string.prototype.startswith' );
 
 ************************************/
 
-app.use(express.static( __dirname + '/bower_components' ) );
+app.use(express.static(__dirname + '/bower_components' ) );
 app.use(express.static(__dirname + '/views'));
+app.use(express.static(__dirname + '/data'));
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({
   extended: true
@@ -48,21 +51,34 @@ app.set('view engine', '.hbs');
 ************************************/
 
 app.get( '/', function( req, res, next ){
-
-	// potentially add option to pass custom aggregate object,, right now its 
-	// { $group: 
-	//     { _id: '$title', totalPages: { $sum: 1 } } 
-	// }
 	database.dbInfo(function(results){
-		return res.render('index', {'userlist' : results});
+		return res.render('index', {'books' : results});
 	});
-    //Document.find({}, {}, function(e, docs) { // .distict vs .find
-      //var books = collapsePagesIntoBooks(docs);
-      //console.log(docs);
-      //return res.render('index', {'userlist' : books});
-    //});
-    //return res.render( 'index' );
-    //return res.render('index', {'userlist' : docs});
+});
+
+app.get( '/grid', function( req, res, next ){
+  database.dbInfo(function(results){
+    return res.render('grid', {'books' : results});
+  });
+});
+
+app.get( '/trash', function( req, res, next ){
+    fs.readdir("./data/trash",function(error,files){
+      if(error) console.log(error);
+        else{
+          for(var i in files){
+            if(/.+\.pdf/i.test(files[i])){
+              curFile = files[i];  
+              console.log(curFile);    
+            }
+          }
+        }
+    });
+   // database.dbInfo(function(results){
+   //     return res.render( 'trash',{'books' : results} );
+   // });
+   return res.render( 'trash');
+
 });
 
 app.get( '/upload', function( req, res, next ){
@@ -81,6 +97,38 @@ app.get("/search", function(req, res, next) {
     return res.render('search');
   }
 });
+
+/************************************
+
+ EXPRESS GET for PDF images
+
+************************************/
+
+app.get(/(.*\.pdf)\/([0-9]+).png$/i, function (req, res) {
+    var pdfPath = req.params[0];
+    var pageNumber = req.params[1];
+ 
+    var PDFImage = require("pdf-image").PDFImage;
+    var pdfImage2 = new PDFImage('data/'+pdfPath, { convertOptions: {'-density': '36', '-trim':'' /*'-quality':'90' I don't think this works */}, convertExtension : 'png', outputDirectory : __dirname+'/data/thumbnails/' });
+
+
+
+    pdfImage2.convertPage(pageNumber).then(function (imagePath) {
+
+      //This part moves image from Done Folder to Thumbnail folder
+      image = imagePath.split('/').pop();
+      mv(imagePath, __dirname+'/data/thumbnails/'+image);
+
+      //Send File to browser 
+      //res.sendFile(imagePath, { root : __dirname});
+      res.sendFile('data/thumbnails/'+image, { root : __dirname});
+    }, function (err) {
+      res.status(500).json( {
+          error : err.message
+        } );
+    });
+  });
+
 
 /************************************
 
@@ -141,5 +189,56 @@ function collapsePagesIntoBooks(data)
   return books;
 }
 
-
 module.exports = app;
+
+/************************************
+
+TEMPORARY FUNCTIONS FOR CRON INDEXING
+
+************************************/
+
+var CronJob = require('cron').CronJob;
+//var //database = require('../database.js');
+//var elasticsearch = require('elasticsearch');
+//var client = new elasticsearch.Client();
+var fs = require('fs');
+//var tika = require('tika');
+var curFile = '';
+
+
+var job = new CronJob({
+    cronTime: '0 * * * * *',
+    onTick: function() {
+    fs.readdir("./data/uploads",function(error,files){
+        if(error) console.log(error);
+          else{
+            for(var i in files){
+                if(/.+\.pdf/i.test(files[i])){
+                    curFile = files[i];
+                      //tika.extract(files[i], function(err, text, meta) {
+                        database.addFileCron(curFile, function(err, response){
+                            if(err){
+                              return res.status( 422 ).json( {
+                                error : err.message
+                              } );
+                            } else {
+                              //createDocument(text, meta);
+
+                            }
+                        });  
+                        
+                      //});
+                  }
+              }
+          }
+      });
+  },
+  start: false
+});
+job.start();
+
+
+
+
+
+

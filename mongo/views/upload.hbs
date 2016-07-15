@@ -32,7 +32,7 @@
         <p class="name" data-dz-name></p>
         <strong class="error text-danger" data-dz-errormessage></strong>
     </div>
-    <div>
+    <div class="progress-bar-container">
         <p class="size" data-dz-size></p>
         <div id="total-progress" class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <div class="progress-bar progress-bar-success" style="width:0%;" data-dz-uploadprogress></div>
@@ -84,7 +84,7 @@
 		  	filePath = response.path.substring(0, response.path.lastIndexOf("/"));
 		  	fileName = response.originalname; 
  		  	$(file.previewTemplate).append('<span class="server_file" style="display:none;">'+filePath+'/'+fileName+'</span>');
-			
+			$(file.previewTemplate).children('.progress-bar-container').children('.progress.progress-striped.active').css('opacity', "0");
 
 		  },
 		  init: function() {
@@ -94,18 +94,21 @@
 		     
 				this.on("totaluploadprogress", function(progress) {
 					//console.log(progress);
-					if(document.querySelector("#total-progress .progress-bar")){ //THIS WAS NEED BECAUSE THIS EVENT GETS TRIGGER ON REMOVEFILE BUT THE PROGRESS BAR IS NULL AT THAT POINT. 
-						document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+					if($(file.previewTemplate).children('.progress-bar')){ //THIS WAS NEED BECAUSE THIS EVENT GETS TRIGGER ON REMOVEFILE BUT THE PROGRESS BAR IS NULL AT THAT POINT. 
+						//document.querySelector("#total-progress .progress-bar").style.width = progress + "%";
+						$(file.previewTemplate).children('div').children('.progress-bar').css('width', progress + "%");
 					};
 				});
 				this.on("sending", function(file) {
 				  // Show the total progress bar when upload starts
-				  document.querySelector("#total-progress").style.opacity = "1";
+				  //document.querySelector("#total-progress").style.opacity = "1";
+				  $(file.previewTemplate).children('div').children('.progress-bar').css('opacity', "1");
 				  // And disable the start button
 				  //file.previewElement.querySelector(".start").setAttribute("disabled", "disabled");
 				});
 				this.on("queuecomplete", function(progress) {
-				  document.querySelector("#total-progress").style.opacity = "0";
+				  //document.querySelector("#total-progress").style.opacity = "0";
+				  
 				});
 				this.on("removedfile", function(file) {
    					// Make sure the button click doesn't submit the form:

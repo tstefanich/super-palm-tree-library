@@ -4,12 +4,16 @@
 
 ************************************/
 
+//ensureIndex!!!
+//http://stackoverflow.com/questions/21417711/search-multiple-fields-for-multiple-values-in-mongodb
+
 // NOTES: probably make this into a singleton-like thing (don't want multiple database inits)
 // also potentially switch to a constructor thing and add the init stuff to that
 
 require('shelljs/global');
 var mongoose = require('mongoose');
 var fs = require('fs');
+var mime = require('mime');
 var database = {
 
   Document : null,
@@ -30,7 +34,10 @@ var database = {
       console.log('database connection successful');
 
       self.docSchema = mongoose.Schema({
+        pdf: String,
         title: String,
+        author: String,
+        year: Number,
         page: Number,
         text: String
       });
@@ -121,8 +128,37 @@ database.searchDocs = function (keyword, callback)
 
 }
 
+
+
+database.searchDocsTrash = function (keyword, callback)
+{
+  console.time('searchTime');
+  var items = [];
+  this.Document.find(
+        { $text : { $search : keyword } }, 
+        { score : { $meta: "textScore" } }
+    )
+    .sort({ score : { $meta : 'textScore' } })
+    .exec(function(err, results) {
+      // console.log(results);
+    if(results.length > 0) {
+      for (var nextResult of results){
+        items.push(nextResult);
+        console.log(nextResult.title + ' : ' + nextResult.page + ' : ' + nextResult.text);
+      }
+    } else {
+      console.log('no results');
+    }
+    console.timeEnd('searchTime');
+    callback(items);
+    });
+
+}
+
 database.addFile = function(file, callback){
 
+  // First part !file.mimetype.startsWith( 'application/pdf' ) is for Node Express Upload File Object
+  // Second is for Cron Job use of addFile as it a multer req.file object
   if ( !file.mimetype.startsWith( 'application/pdf' ) ) {
     return callback({
       text : 'The uploaded file must be a pdf'
@@ -142,13 +178,89 @@ database.addFile = function(file, callback){
   }
 
   // rename file
-  cd(__dirname + '/uploads');
+  cd(__dirname + '/data/uploads');
   // some issues with shell when '&' appears in filename, this is a temporary solution
   var fileString = file.originalname.replace('&','and');
+  fileString = fileString.replace('#','-');
+  fileString = fileString.replace('%','-');
+  fileString = fileString.replace('$','-');
+  fileString = fileString.replace(/ /g,"-");
+
+  // added this as a temp solution was not able to do get request on pdf files with periods in the name.
+  //fileString = fileString.replace('.','-');
+
   var folderString = fileString.slice(0,-4);
   mv(file.filename, fileString);
 
-  console.log(fileString);
+
+  var fileInfo = exec('pdfinfo ' + fileString).stdout;
+  var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
+
+  var pdfTitle = /Title:\s+(\w+.*)/g.exec(fileInfo);
+  if(pdfTitle == null){
+    console.log('[ NO TITLE DATA ] whoops this pdf does not have title metadata');
+  }
+  
+  var pdfAuthor = /Author:\s+(\w+.*)/g.exec(fileInfo);
+  console.log('author' + pdfAuthor);
+  if(pdfAuthor == null){
+    console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
+  }
+  
+  // Check to see if PDF has metadata has Title, Author, (maybe these too --- subject, keywords)
+  var pdfMetaData = exec('pdftotext ' + fileString +' - | wc -l').stdout;
+ //if(Number(pdfText) == 0){
+ //  console.log('whoops this pdf is does not have metadata');
+ //  //return res.status( 422 ).json ( { 
+ //  //  error : 'please use adobe acrobat or PDFMtEd or another program to OCR your pdf.'
+ //  //});
+ //}
+  
+  //console.time("pdftotext"); // on my comp this is averaging about 35s on 250pg book
+  //for(var p = 1; p < numberOfPages; p++){
+  //  // save text to file, 
+  //  // exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' ' + folderString + '-' + p + '.txt');
+  //  // text to stdout
+  //  var pageText = exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' -',{silent:true}).stdout;
+  //  // then I would pass it to mongo
+  //  var page = new this.Document({
+  //    title: folderString,
+  //    page: p,
+  //    text: pageText
+  //  });
+//
+  //  if(typeof this.Document !== 'undefined') this.saveDocument(page);
+//
+  //}
+  //console.timeEnd("pdftotext");
+//
+  //// now that the pages are all separated, we have to manually add the text for each page to our db
+  //// exec('pdftotext')
+//
+  //// method 2: pdfseparate, then pdftotext each separate page
+
+  cd(__dirname);
+
+  return callback(null, file);
+}
+
+database.addFileCron = function(file, callback){
+
+  // grab pdf info
+  if(!which('pdfinfo')){
+    return callback({
+      messagge : 'server missing dependency. Install Brew then type "brew install poppler"'
+    }, null);
+  }
+  console.log(file);
+  // rename file
+  cd(__dirname + '/data/uploads');
+  // some issues with shell when '&' appears in filename, this is a temporary solution
+  var fileString = file.replace('&','and');
+  var folderString = fileString.slice(0,-4);
+  mv(file, fileString);
+
+  console.log(folderString);
 
   var fileInfo = exec('pdfinfo ' + fileString).stdout;
   var numberOfPages = /Pages:\s+(\d+)/g.exec(fileInfo)[1];
@@ -163,6 +275,7 @@ database.addFile = function(file, callback){
   console.log('author' + pdfAuthor);
   if(pdfAuthor == null){
     console.log('[ NO AUTHOR DATA ] whoops this pdf does not have author metadata');
+    pdfAuthor = '--';
   }
 
   // Check to see if PDF has metadata has Title, Author, (maybe these too --- subject, keywords)
@@ -182,7 +295,9 @@ database.addFile = function(file, callback){
     var pageText = exec('pdftotext -f ' + p + ' -l ' + p + ' ' + fileString + ' -',{silent:true}).stdout;
     // then I would pass it to mongo
     var page = new this.Document({
+      pdf: fileString,
       title: folderString,
+      author: pdfAuthor,
       page: p,
       text: pageText
     });
@@ -191,7 +306,10 @@ database.addFile = function(file, callback){
 
   }
   console.timeEnd("pdftotext");
+  console.log('made it!!! '+ __dirname+'/data/done/'+fileString);
 
+  mv(fileString, __dirname+'/data/done/'+fileString);
+                              //return res.status( 200 ).send( response );
   // now that the pages are all separated, we have to manually add the text for each page to our db
   // exec('pdftotext')
 
@@ -200,6 +318,21 @@ database.addFile = function(file, callback){
   cd(__dirname);
 
   return callback(null, file);
+}
+
+
+
+database.saveTitle = function (searchTerm, newTitle){
+  this.Document.update(
+    { _id: searchTerm },
+    { $set:
+      {
+        title: newTitle
+      }
+    }, function (err) {
+      if (err) return handleError(err);
+      // updated!
+    });
 }
 
 database.saveDocument = function (doc){
@@ -234,7 +367,13 @@ database.removeFileFromServer = function (req){
 database.dbInfo = function (callback) {
   database.Document.aggregate(
     { $group: 
-      { _id: '$title', totalPages: { $sum: 1 } } 
+      { _id: '$title',
+        totalPages: { $sum: 1 },
+        pdf: { $addToSet: "$pdf"  },
+        title: { $addToSet: "$title"  },
+        author: { $addToSet: "$author"  },
+        year: { $addToSet: "$year"  }
+      } 
     },
     function (err, results) {
       if (err) return handleError(err);

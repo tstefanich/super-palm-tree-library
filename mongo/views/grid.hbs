@@ -10,12 +10,12 @@
     <meta name="author" content="">
     <link rel="icon" href="../../favicon.ico">
 
-    <title>Starter Template for Bootstrap</title>
+    <title>Super Palm Tree</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="/pdfjs-bower/dist/pdf.js"></script>
-    <link href="styles.css" rel="stylesheet">
+    <link href="../styles.css" rel="stylesheet">
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <!--<link href="/bootstrap/dist/assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">-->
@@ -83,21 +83,14 @@
     </nav>
 
     <div class="container">
-      <div id="products" class="">
-        <div class="item list-group-item title-headers clearfix col-md-4">
-          <div class="col col-xs-0 col-sm-1 col-md-1 hidden-xs">&nbsp;</div>
-          <div class="col col-xs-5 col-sm-5 col-md-5">Title</div>
-          <div class="col col-xs-3 col-sm-3 col-md-3">Author</div>
-          <div class="col col-xs-3 col-sm-1 col-md-1">Year</div>
-          <div class="col col-xs-0 col-sm-2 col-md-2 hidden-xs">Total Pages</div>
-        </div>
+      <div id="products" class="grid">
         {{#each books}}
-            <div data-pdf-file="{{pdf}}" class="item item-content list-group-item clearfix col-xs-4 col-sm-4 col-md-4">
-              <div class="col col-xs-0 col-sm-1 col-md-1 image hidden-xs"><img src="/done/{{pdf}}/0.png"></div>
-              <div class="col col-xs-5 col-sm-5 col-md-5">{{title}}</div>
-              <div class="col col-xs-3 col-sm-3 col-md-3">{{author}}</div>
+            <div data-pdf-file="{{pdf}}" class="item item-content clearfix col-xs-6 col-sm-3 col-md-2">
+              <div class="col col-xs-12 col-sm-12 col-md-12 image"><img src="/done/{{pdf}}/0.png"></div>
+              <div class="col col-xs-12 col-sm-12 col-md-12 title">{{title}}</div>
+              <!--<div class="col col-xs-3 col-sm-3 col-md-3">{{author}}</div>
               <div class="col col-xs-3 col-sm-1 col-md-1">{{year}}</div>
-              <div class="col col-xs-0 col-sm-2 col-md-2 hidden-xs">{{totalPages}}</div>
+              <div class="col col-xs-0 col-sm-2 col-md-2 hidden-xs">{{totalPages}}</div>-->
             </div>
         {{/each}}
       </div>
@@ -110,6 +103,112 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="/jquery/dist/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="/jquery/dist/assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script type="text/javascript">
+    var currentHeighest = 0;
+
+
+
+    $(window).load(function(){
+      /*==========================================
+           Match All Title Heights in a row  
+      ===========================================*/
+      
+
+      // TITLES
+      $('.item').children('.title').each(function(){
+          var currentHeight = $(this).outerHeight();
+          if(currentHeight > currentHeighest || currentHeighest == undefined){
+            currentHeighest = currentHeight;
+          }
+      });
+      $('.item').children('.title').each(function(){
+        $(this).css('height',currentHeighest+"px");
+      }); 
+
+      // Image BOXES
+      $('.item').children('.image').children('img').each(function(){
+          var currentHeight = $(this).outerHeight();
+          if(currentHeight > currentHeighest || currentHeighest == undefined){
+            currentHeighest = currentHeight;
+          }
+      });
+      $('.item').children('.image').each(function(){
+        $(this).css('height',currentHeighest+"px");
+      }); 
+
+      // BOXES
+      currentHeighest = 0;
+      $('.item').each(function(){
+          var currentHeight = $(this).outerHeight();
+          if(currentHeight > currentHeighest || currentHeighest == undefined){
+            currentHeighest = currentHeight;
+          }
+      });
+      $('.item').each(function(){
+        $(this).css('height',currentHeighest+"px");
+      }); 
+
+
+
+    });
+
+
+    
+    /// THIS DOES NOT REALLY WORK>>>> BUT NOT IMPORTANT RIGhT NOW
+    /// ALthough this code works for windows load just fine
+    $(window).resize(function(){
+      console.log('test');
+            /*==========================================
+           Match All Title Heights in a row  
+      ===========================================*/
+     
+
+      // TITLES
+      currentHeighest = 0;
+      $('.item').children('.title').each(function(){
+         
+          var currentHeight = $(this).outerHeight();
+          if(currentHeight > currentHeighest || currentHeighest == undefined){
+            currentHeighest = currentHeight;
+          }
+      });
+      $('.item').children('.title').each(function(){
+        $(this).css('height',currentHeighest+"px");
+      }); 
+
+      // Image BOXES
+       currentHeighest = 0;
+      $('.item').children('.image').children('img').each(function(){
+        
+          var currentHeight = $(this).height();
+          if(currentHeight > currentHeighest || currentHeighest == undefined){
+            currentHeighest = currentHeight;
+          }
+      });
+      $('.item').children('.image').each(function(){
+        $(this).css('height',currentHeighest+"px");
+      }); 
+
+      // BOXES
+      currentHeighest = 0;
+      $('.item').each(function(){
+        
+        
+          var currentHeight = $(this).height();
+          if(currentHeight > currentHeighest || currentHeighest == undefined){
+            currentHeighest = currentHeight;
+          }
+          
+      });
+       $('.item').each(function(){
+            $(this).css('height',currentHeighest+"px");
+            console.log('made it');
+          }); 
+     
+
+    });
+
+    </script>
     <script src="/bootstrap/dist/js/bootstrap.min.js"></script>
 
   </body>
