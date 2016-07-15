@@ -36,11 +36,13 @@ require( 'string.prototype.startswith' );
 app.use(express.static(__dirname + '/bower_components' ) );
 app.use(express.static(__dirname + '/views'));
 app.use(express.static(__dirname + '/data'));
-app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({
   extended: true
 }))
+app.use(bodyParser.json());       // to support JSON-encoded bodies
 //app.engine('html', require('ejs').renderFile);
+
+// Create `ExpressHandlebars` instance with a default layout.
 app.engine( '.hbs', exphbs( { extname: '.hbs' } ) );
 app.set('view engine', '.hbs');
 
@@ -72,12 +74,17 @@ app.get( '/trash', function( req, res, next ){
               console.log(curFile);    
             }
           }
+
+          database.searchDocsTrash(files, function(results){
+            console.log(results);
+            return res.render( 'trash',{'books' : results} );
+          });
+
         }
     });
-   // database.dbInfo(function(results){
-   //     return res.render( 'trash',{'books' : results} );
-   // });
-   return res.render( 'trash');
+
+
+    //return res.render( 'trash');
 
 });
 
@@ -130,13 +137,25 @@ app.get(/(.*\.pdf)\/([0-9]+).png$/i, function (req, res) {
   });
 
 
+
+
 /************************************
 
  EXPRESS POST
 
 ************************************/
+app.post( '/restore', function( req, res ) {
+  database.restoreFile(req);
+  // This was need for successful callback for ajax
+  // This should probably be in a callback maybe inside the restoreFile request.... maybe....
+  res.send(req.body);
+}); 
+
 app.post( '/delete', function( req, res ) {
   database.removeFileFromServer(req);
+    // This was need for successful callback for ajax
+  // This should probably be in a callback maybe inside the deleteFile request.... maybe....
+  res.send(req.body);
 }); 
 
 app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
@@ -153,6 +172,9 @@ app.post( '/upload', upload.single( 'file' ), function( req, res, next ) {
 	  	}
 	});  
 });
+
+
+
 
 /************************************
 

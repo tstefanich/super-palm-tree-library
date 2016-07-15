@@ -132,6 +132,102 @@
         padding-top: 10px;
         padding-bottom: 10px;
     }
+
+
+
+
+    /******************
+
+    Navigation Search
+
+    *******************/
+    .navbar-nav li.menu-item-16358 {
+        width: 17px;
+        -webkit-transition: all 150ms ease-in-out;
+        -moz-transition: all 150ms ease-in-out;
+        -o-transition: all 150ms ease-in-out;
+        transition: all 150ms ease-in-out;
+        overflow: hidden;
+        right: 0;
+        position: absolute;
+        background: #f8f8f8;
+        height: 39px;
+    }
+
+    .navbar-nav li.menu-item-16358 .search-container {
+        width: 100%;
+        position: absolute;
+        right: 0px;
+        height: 40px;
+    }
+
+    .navbar-nav li.menu-item-16358 .search-container a {
+        padding-top: 12px;
+        color: black;
+        text-decoration: none;
+    }
+
+
+
+    .navbar-nav li.menu-item-16358 form {
+        display: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus,
+    button:focus {
+       outline: none;
+    }
+
+    /**************************
+
+    Navigation Search Expanded
+
+    ***************************/
+
+    .navbar-nav li.menu-item-16358.expanded a {
+      right: -23px;
+      position: relative;
+      color: black;
+    }
+    .navbar-nav li.menu-item-16358.expanded form {
+        display: none;
+        display: inline-block;
+        width: 100%;
+        position: absolute;
+        //top:5px;
+        right: 0px;
+    }
+    .navbar-nav li.menu-item-16358.expanded form input {
+        width: 100%;
+        margin-left: 20px;
+        padding: 8px 4px 4px 33px;
+        border: none;
+        color: black;
+        background-color: transparent;
+        //top: -3px;
+        font-family: 'SpaceMono-Bold', monospace,sans-serif;
+        font-weight: 400;
+        font-style: normal;
+        font-size: 20px;
+        -webkit-font-smoothing: antialiased;
+        -webkit-box-shadow: none;
+        -moz-box-shadow: none;
+        box-shadow: none;
+        display: inline-block;
+    }
+
+    .navbar-nav li.menu-item-16358.expanded {
+        width: 100%;
+    }
+
+
+    /******************
+
+    Navigation Mobile
+
+    *******************/
     .navbar-toggle {
         margin-top: 4px;
         margin-right: 5px;
@@ -146,6 +242,11 @@
     .navbar-default .navbar-toggle .icon-bar {
        background-color: #000;
     }
+
+
+
+
+
 
     #products .item.list-group-item.title-headers{
         font-weight: bold;
