@@ -19,53 +19,59 @@ var database = {
   Document : null,
   docSchema : null,
 
+  myTest: function(){console.log("this is a test")},
   init : function(){
-
-    // connect to database
-    mongoose.connect('mongodb://localhost/test');
-
-
-    var db = mongoose.connection;
-    db.on('error', function(){reject({message: "db connection error"})}); 
-
     var self = this;
-    // once connected, do stuff
-    db.once('open', function(){
-      // we're connected!
-      console.log('database connection successful');
+    return new Promise(function(resolve, reject){
 
-      self.docSchema = mongoose.Schema({
-        pdf: String,
-        status: String, // indexed, indexing, unindexed, trash
-        title: String,
-        author: String,
-        year: Number,
-        page: Number,
-        text: String
+      console.log("connecting to database...");
+
+      // connect to database
+      mongoose.connect('mongodb://localhost/test');
+
+      var db = mongoose.connection;
+
+      db.on('error', function(){reject({message: "db connection error"})}); 
+
+      // once connected, do stuff
+      db.once('open', function(){
+        // we're connected!
+        console.log('database connection successful');
+
+        self.docSchema = mongoose.Schema({
+          pdf: String,
+          title: String,
+          author: String,
+          year: Number,
+          page: Number,
+          text: String
+        });
+
+        // Very Important! Make the title and text parameters "text" indices
+        self.docSchema.index({text:'text'});
+
+        // make sure to add any methods b4 defining the model
+        self.docSchema.methods.test = function () {
+          // code that might do something, can reference self with 'this.title' etc.
+          console.log(this.title + " page: " + this.page + " complete");
+        }
+
+        // define document model
+        self.Document = mongoose.model('Document', self.docSchema);
+
+        // listAllDocs(Document);
+        //searchDocs(Document, 'blade runner', function(results){
+        //  console.log('first search')
+        //});
+
+        // create a dummy Doc and save it
+
+        // var testDoc = new Document({title: 'My Second Document'});
+        // console.log(testDoc.title);
+        // saveDocument(testDoc);
+        resolve(self);
       });
 
-      // Very Important! Make the title and text parameters "text" indices
-      self.docSchema.index({text:'text'});
-
-      // make sure to add any methods b4 defining the model
-      self.docSchema.methods.test = function () {
-        // code that might do something, can reference self with 'this.title' etc.
-        console.log(this.title + " page: " + this.page + " complete");
-      }
-
-      // define document model
-      self.Document = mongoose.model('Document', self.docSchema);
-
-      // listAllDocs(Document);
-      //searchDocs(Document, 'blade runner', function(results){
-      //  console.log('first search')
-      //});
-
-      // create a dummy Doc and save it
-
-      // var testDoc = new Document({title: 'My Second Document'});
-      // console.log(testDoc.title);
-      // saveDocument(testDoc);
     });
   }
 }
@@ -79,35 +85,35 @@ DATABASE FUNCTIONS
 
 database.listAllDocs = function ()
 {
-	this.Document.find(function (err, docs) 
+  this.Document.find(function (err, docs) 
   {
-		if (err) return console.error(err);
-		//console.log(docs);
-	});
+    if (err) return console.error(err);
+    //console.log(docs);
+  });
 }
 
 database.searchDocs = function (keyword, callback)
 {
-	console.time('searchTime');
+  console.time('searchTime');
   var items = [];
-	// var r = new RegExp(keyword,'');
+  // var r = new RegExp(keyword,'');
  //  
-	// DocModel.find({ 'text': {$regex:r}}, function(err, results){
-	// 	if (err) return console.error(err);
-		
+  // DocModel.find({ 'text': {$regex:r}}, function(err, results){
+  //  if (err) return console.error(err);
+    
  //    // returns results array
-	// 	if(results.length > 0) {
-	// 		for (var nextResult of results){
-	// 			//console.log('page '+nextResult);
+  //  if(results.length > 0) {
+  //    for (var nextResult of results){
+  //      //console.log('page '+nextResult);
  //        items.push(nextResult);
-	// 		}
-	// 	} else {
-	// 		console.log('no results');
-	// 	}
-	// 	console.timeEnd('searchTime');
+  //    }
+  //  } else {
+  //    console.log('no results');
+  //  }
+  //  console.timeEnd('searchTime');
  //    //console.log(items);
  //    callback(items);
-	// });
+  // });
 
   this.Document.find(
         { $text : { $search : keyword } }, 
@@ -160,11 +166,6 @@ this.Document.aggregate(
           { pdf: 
             { 
               $in: pdfs
-            } 
-          },
-          { status: 
-            { 
-              $in: 'trash'
             } 
           }
           ]
@@ -267,7 +268,7 @@ database.addFile = function(file, callback){
   return callback(null, file);
 }
 
-database.addFileCron = function(file, callback){
+database.addFileCron = function(file, directory, callback){
 
   // grab pdf info
   if(!which('pdfinfo')){
@@ -319,14 +320,11 @@ database.addFileCron = function(file, callback){
     // then I would pass it to mongo
     var page = new this.Document({
       pdf: fileString,
-      status: 'indexed',
       title: folderString,
       author: pdfAuthor,
-      //year: Number,
       page: p,
       text: pageText
     });
-
 
     if(typeof this.Document !== 'undefined') this.saveDocument(page);
 
@@ -362,10 +360,10 @@ database.saveTitle = function (searchTerm, newTitle){
 }
 
 database.saveDocument = function (doc){
-	doc.save(function (err, doc) {
-		if (err) return console.error(err);
-		// doc.test(); // maybe run the function if you feel like it
-	});
+  doc.save(function (err, doc) {
+    if (err) return console.error(err);
+    // doc.test(); // maybe run the function if you feel like it
+  });
 }
 
 database.clearSomeDocuments = function (searchTerm, callback) {
