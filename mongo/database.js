@@ -19,59 +19,52 @@ var database = {
   Document : null,
   docSchema : null,
 
-  myTest: function(){console.log("this is a test")},
   init : function(){
+
+    // connect to database
+    mongoose.connect('mongodb://localhost/test');
+
+    var db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'connection error:')); 
+
     var self = this;
-    return new Promise(function(resolve, reject){
+    // once connected, do stuff
+    db.once('open', function(){
+      // we're connected!
+      console.log('database connection successful');
 
-      console.log("connecting to database...");
-
-      // connect to database
-      mongoose.connect('mongodb://localhost/test');
-
-      var db = mongoose.connection;
-
-      db.on('error', console.error.bind(console, 'connection error:')); 
-
-      // once connected, do stuff
-      db.once('open', function(){
-        // we're connected!
-        console.log('database connection successful');
-
-        self.docSchema = mongoose.Schema({
-          pdf: String,
-          title: String,
-          author: String,
-          year: Number,
-          page: Number,
-          text: String
-        });
-
-        // Very Important! Make the title and text parameters "text" indices
-        self.docSchema.index({text:'text'});
-
-        // make sure to add any methods b4 defining the model
-        self.docSchema.methods.test = function () {
-          // code that might do something, can reference self with 'this.title' etc.
-          console.log(this.title + " page: " + this.page + " complete");
-        }
-
-        // define document model
-        self.Document = mongoose.model('Document', self.docSchema);
-
-        // listAllDocs(Document);
-        //searchDocs(Document, 'blade runner', function(results){
-        //  console.log('first search')
-        //});
-
-        // create a dummy Doc and save it
-
-        // var testDoc = new Document({title: 'My Second Document'});
-        // console.log(testDoc.title);
-        // saveDocument(testDoc);
-        resolve(self);
+      self.docSchema = mongoose.Schema({
+        pdf: String,
+        status: String, // indexed, indexing, unindexed, trash
+        title: String,
+        author: String,
+        year: Number,
+        page: Number,
+        text: String
       });
 
+      // Very Important! Make the title and text parameters "text" indices
+      self.docSchema.index({text:'text'});
+
+      // make sure to add any methods b4 defining the model
+      self.docSchema.methods.test = function () {
+        // code that might do something, can reference self with 'this.title' etc.
+        console.log(this.title + " page: " + this.page + " complete");
+      }
+
+      // define document model
+      self.Document = mongoose.model('Document', self.docSchema);
+
+      // listAllDocs(Document);
+      //searchDocs(Document, 'blade runner', function(results){
+      //  console.log('first search')
+      //});
+
+      // create a dummy Doc and save it
+
+      // var testDoc = new Document({title: 'My Second Document'});
+      // console.log(testDoc.title);
+      // saveDocument(testDoc);
     });
   }
 }
@@ -166,6 +159,11 @@ this.Document.aggregate(
           { pdf: 
             { 
               $in: pdfs
+            } 
+          },
+          { status: 
+            { 
+              $in: 'trash'
             } 
           }
           ]
@@ -268,7 +266,7 @@ database.addFile = function(file, callback){
   return callback(null, file);
 }
 
-database.addFileCron = function(file, directory, callback){
+database.addFileCron = function(file, callback){
 
   // grab pdf info
   if(!which('pdfinfo')){
@@ -320,11 +318,14 @@ database.addFileCron = function(file, directory, callback){
     // then I would pass it to mongo
     var page = new this.Document({
       pdf: fileString,
+      status: 'indexed',
       title: folderString,
       author: pdfAuthor,
+      //year: Number,
       page: p,
       text: pageText
     });
+
 
     if(typeof this.Document !== 'undefined') this.saveDocument(page);
 
