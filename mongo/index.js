@@ -28,13 +28,10 @@ database.init()
         app.listen( 8080, function() {  
           console.log( 'Express server listening on port 8080' );
         });
-<<<<<<< HEAD
-       return;
-    }); 
-=======
+
+
     })
     .catch((err) => console.log("uh oh: " + err.message)); 
->>>>>>> johnbrumley/master
 
 
 var j = schedule.scheduleJob('30 * * * * *', function(){

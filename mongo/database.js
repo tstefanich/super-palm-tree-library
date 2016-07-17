@@ -24,12 +24,9 @@ var database = {
     // connect to database
     mongoose.connect('mongodb://localhost/test');
 
-<<<<<<< HEAD
+
     var db = mongoose.connection;
-    db.on('error', console.error.bind(console, 'connection error:')); 
-=======
-      db.on('error', function(){reject({message: "db connection error"})}); 
->>>>>>> johnbrumley/master
+    db.on('error', function(){reject({message: "db connection error"})}); 
 
     var self = this;
     // once connected, do stuff
