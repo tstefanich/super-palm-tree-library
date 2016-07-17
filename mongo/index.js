@@ -53,10 +53,10 @@ var b = schedule.scheduleJob('30 * * * * *', function(){
 
 
     console.log('Database Backup Cron Success');
-    var trashBackups = exec('find ./data/dbBackups/* -mtime +30 -exec rm -f {} \\; ').stdout;
+    var trashBackups = exec('find ./data/database-backups/* -mtime +30 -exec rm -f {} \\; ').stdout;
     //sudo mongodump --db newdb --out /var/backups/mongobackups/`date +"%m-%d-%y"`
     //3 3 * * * `
-    var dbBackups = exec('mongodump --out ./data/dbBackups/date-'+curr_year + '-' + curr_month + '-' +curr_date+'').stdout;
+    var dbBackups = exec('mongodump --out ./data/database-backups/date-'+curr_year + '-' + curr_month + '-' +curr_date+'').stdout;
     //    find /var/backups/mongobackups/ -mtime +7 -exec rm -rf {} \;
     //var trash = exec('find ./data/trash/* -mtime +30 -exec rm -f {} \\; ').stdout;
     //var trash = cp.fork('./schedules/trash');
