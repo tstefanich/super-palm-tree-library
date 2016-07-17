@@ -31,7 +31,7 @@ var database = {
 
       var db = mongoose.connection;
 
-      db.on('error', console.error.bind(console, 'connection error:')); 
+      db.on('error', function(){reject({message: "db connection error"})}); 
 
       // once connected, do stuff
       db.once('open', function(){
