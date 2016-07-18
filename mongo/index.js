@@ -34,39 +34,24 @@ database.init()
     .catch((err) => console.log("uh oh: " + err.message)); 
 
 
-var j = schedule.scheduleJob('30 * * * * *', function(){
+var j = schedule.scheduleJob('00 00 24 * * *', function(){
     console.log('Trash Cron Success');
-	var trash = exec('find ./data/trash/* -mtime +30 -exec rm -f {} \\; ').stdout;
-	//var trash = cp.fork('./schedules/trash');
-	//trash.on('close', (code) => console.log(`trash exited w/ code ${code}`));
+	
+    var trash = exec('find ./data/trash/* -mtime +30 -exec rm -f {} \\; ').stdout;
 });
 
 
+var b = schedule.scheduleJob('00 00 24 * * *', function(){
+    console.log('Database Backup Cron Success');
 
-
-var b = schedule.scheduleJob('30 * * * * *', function(){
     var d = new Date();
     var curr_date = d.getDate();
     var curr_month = d.getMonth() + 1; //Months are zero based
     var curr_year = d.getFullYear();
-    console.log(curr_date + "-" + curr_month + "-" + curr_year);
 
-
-    console.log('Database Backup Cron Success');
     var trashBackups = exec('find ./data/database-backups/* -mtime +30 -exec rm -f {} \\; ').stdout;
-    //sudo mongodump --db newdb --out /var/backups/mongobackups/`date +"%m-%d-%y"`
-    //3 3 * * * `
     var dbBackups = exec('mongodump --out ./data/database-backups/date-'+curr_year + '-' + curr_month + '-' +curr_date+'').stdout;
-    //    find /var/backups/mongobackups/ -mtime +7 -exec rm -rf {} \;
-    //var trash = exec('find ./data/trash/* -mtime +30 -exec rm -f {} \\; ').stdout;
-    //var trash = cp.fork('./schedules/trash');
-    //trash.on('close', (code) => console.log(`trash exited w/ code ${code}`));
 });
-
-// var j = schedule.scheduleJob('30 * * * * *', function(){
-// 	var trash = cp.fork('./schedules/trash');
-// 	trash.on('close', (code) => console.log(`trash exited w/ code ${code}`));
-// });
 
 
 // dealing with exit since we've got children

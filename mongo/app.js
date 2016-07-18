@@ -11,7 +11,7 @@ var bodyParser = require('body-parser');
 var util = require('util');
 
 
-
+var fs = require('fs');
 
 
 var app = express();
@@ -67,6 +67,7 @@ app.get( '/trash', function( req, res, next ){
     fs.readdir("./data/trash",function(error,files){
       if(error) console.log(error);
         else{
+
           for(var i in files){
             if(/.+\.pdf/i.test(files[i])){
               curFile = files[i];  
@@ -81,10 +82,6 @@ app.get( '/trash', function( req, res, next ){
 
         }
     });
-
-
-    //return res.render( 'trash');
-
 });
 
 app.get( '/upload', function( req, res, next ){
@@ -135,7 +132,44 @@ app.get(/(.*\.pdf)\/([0-9]+).png$/i, function (req, res) {
     });
   });
 
+/************************************
 
+ EXPRESS GET BOOK URLS
+ -- This is now used for Single View
+
+************************************/
+app.get('/entry/:title/view', function(req, res) {
+    var title = req.params.title;
+    title = title.split('!!!!!!!!!!!!!!!!!!');//Ther should be an easier way.
+    console.log(title);
+    database.searchDocsTitle(title, function(results){
+      console.log('Render Single View');
+      return res.render( 'viewer',{'books' : results} );
+    });
+});
+
+app.get('/entry/:title/edit', function(req, res) {
+    var title = req.params.title;
+    title = title.split('!!!!!!!!!!!!!!!!!!');//Ther should be an easier way.
+    console.log(title);
+    database.searchDocsTitle(title, function(results){
+      console.log('Render Single View');
+      return res.render( 'single',{'books' : results} );
+    });
+});
+
+/************************************
+
+ EXPRESS GET FOR ALL UNMATCHED URLS
+ -- This is now used for Single View
+
+************************************/
+
+/*
+app.get('*', function(req, res) {
+
+  //res.redirect("http://www.mysite.com/");
+});*/
 
 
 /************************************

@@ -40,9 +40,10 @@ var database = {
 
         self.docSchema = mongoose.Schema({
           pdf: String,
+          image: Number,
           title: String,
           author: String,
-          year: Number,
+          year: String,
           page: Number,
           text: String
         });
@@ -136,7 +137,46 @@ database.searchDocs = function (keyword, callback)
 
 }
 
+database.searchDocsTitle = function (title, callback)
+{
+//  console.log('searchDocsTrash');
+//    //['NS2016-titles-2015-06-08_1PM.pdf','OCR-mediumBook-English.pdf']
+//    this.Document.find( { pdf: { $in: ['NS2016-titles-2015-06-08_1PM.pdf','OCR-mediumBook-English.pdf'] } } ,
+//    function (err, results) {
+//      console.log(err);
+//      if (err) return console.error(err);
+//      console.log(results);
+//      callback(results);
+//    } )
+//
 
+this.Document.aggregate(
+    { $group: 
+      { _id: '$title',
+        totalPages: { $sum: 1 },
+        pdf: { $addToSet: "$pdf"  },
+        title: { $addToSet: "$title"  },
+        author: { $addToSet: "$author"  },
+        year: { $addToSet: "$year"  }
+      } 
+    },{
+        $match: {  
+          $or: [
+          { title: 
+            { 
+              $in: title
+            } 
+          }
+          ]
+        }  
+    },
+    function (err, results) {
+      if (err) return console.log(err);
+      console.log(results);
+      callback(results);
+    }
+  );
+}
 
 database.searchDocsTrash = function (pdfs, callback)
 {
@@ -320,11 +360,23 @@ database.addFileCron = function(file, directory, callback){
     // then I would pass it to mongo
     var page = new this.Document({
       pdf: fileString,
+      image: 0,
       title: folderString,
       author: pdfAuthor,
+      year: '???',
       page: p,
       text: pageText
     });
+
+    /*
+        pdf: String,
+        image: Number,
+        title: String,
+        author: String,
+        year: String,
+        page: Number,
+        text: String
+    */
 
     if(typeof this.Document !== 'undefined') this.saveDocument(page);
 
@@ -358,6 +410,18 @@ database.saveTitle = function (searchTerm, newTitle){
       // updated!
     });
 }
+
+
+database.backup = function (searchTerm, newTitle){
+  //sudo mongodump --db newdb --out /var/backups/mongobackups/`date +"%m-%d-%y"`
+  //3 3 * * * mongodump --out /var/backups/mongobackups/`date +"%m-%d-%y"`
+  //find /var/backups/mongobackups/ -mtime +7 -exec rm -rf {} \;
+
+
+}
+
+
+
 
 database.saveDocument = function (doc){
   doc.save(function (err, doc) {

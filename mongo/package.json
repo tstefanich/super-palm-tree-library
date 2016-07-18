@@ -20,6 +20,8 @@
     "node-schedule": "^1.1.1",
     "pdf-image": "^1.1.0",
     "pdf2img": "^0.2.0",
+    "require": "^2.4.20",
+    "requirejs": "^2.2.0",
     "shelljs": "^0.6.0",
     "string.prototype.startswith": "^0.2.0"
   }

@@ -1,0 +1,74 @@
+{{> header}}
+
+<style>
+#products.single .item.list-group-item{
+  border:0px;
+  margin-bottom:25px;
+  margin-top: 25px;
+}
+
+.single-details {
+  padding: 15px;
+  padding-left: 0;
+  padding-right: 0;
+  font-weight: bold;
+}
+.single-details span{
+  opacity: .7;
+}
+.single-details .col:first-child{
+  border-top:3px solid;
+
+}
+.single-details .col{
+  border-top:1px dotted;
+  padding: 15px;
+}
+.single-details .col.button-container{
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.single .item.item-content .image{
+  text-align: center;
+}
+
+</style>
+
+    <div class="container">
+      <div id="products" class="single">
+        {{#each books}}
+            <div data-pdf-file="{{pdf}}" class="item item-content list-group-item clearfix col-xs-12 col-sm-12 col-md-12">
+              <div class="col col-xs-0 col-sm-2 col-md-2">&nbsp;</div>
+              <div class="col col-xs-12 col-sm-8 col-md-8 image "><img src="/done/{{pdf}}/0.png"></div>
+              <div class="col col-xs-0 col-sm-2 col-md-2">&nbsp;</div>
+            </div>
+          <div data-pdf-file="{{pdf}}" class="clearfix col-xs-12 col-sm-12 col-md-12">
+            <div class="col col-xs-0 col-sm-2 col-md-3">&nbsp;</div>
+              <div class="col col-xs-12 col-sm-8 col-md-6 image item item-content single-details">
+                <div class="col col-xs-12 col-sm-12 col-md-12">
+                  {{title}}
+                </div>
+                <div class="col col-xs-12 col-sm-12 col-md-12">
+                  <span>Author:</span> {{author}}
+                </div>
+                <div class="col col-xs-12 col-sm-12 col-md-12">
+                  <span>Year:</span> {{year}}</div>
+                <div class="col col-xs-12 col-sm-12 col-md-12">
+                  <span>Pages:</span> {{totalPages}}
+                </div>
+                <div class="col col-xs-12 col-sm-12 col-md-12 button-container">
+                    <a class="btn btn-default download" href="{{pdf}}" role="button">Download</a>
+                    <button type="button" class="btn btn-default btn-restore edit" data-pdf-file="{{pdf}}">Edit</button>
+                    <button type="button" class="btn btn-default btn-restore delete" data-pdf-file="{{pdf}}">Delete</button>                 
+                </div>
+              </div>
+              <div class="col col-xs-0 col-sm-2 col-md-3">&nbsp;</div>
+
+
+            
+            </div>
+        {{/each}}
+      </div>
+    </div><!-- /.container -->
+{{> footer}}
