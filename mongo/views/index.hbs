@@ -6,16 +6,18 @@
           <div class="col col-xs-0 col-sm-1 col-md-1 hidden-xs">&nbsp;</div>
           <div class="col col-xs-5 col-sm-5 col-md-5">Title</div>
           <div class="col col-xs-3 col-sm-3 col-md-3">Author</div>
-          <div class="col col-xs-3 col-sm-1 col-md-1">Year</div>
-          <div class="col col-xs-0 col-sm-2 col-md-2 hidden-xs">Total Pages</div>
+          <div class="col col-xs-3 col-sm-2 col-md-2">Year</div>
+          <div class="col col-xs-0 col-sm-1 col-md-1 hidden-xs">Pages</div>
         </div>
         {{#each books}}
             <div data-pdf-file="{{pdf}}" class="item item-content list-group-item clearfix col-xs-4 col-sm-4 col-md-4">
-              <div class="col col-xs-0 col-sm-1 col-md-1 image hidden-xs"><img src="/done/{{pdf}}/0.png"></div>
-              <div class="col col-xs-5 col-sm-5 col-md-5">{{title}}</div>
-              <div class="col col-xs-3 col-sm-3 col-md-3">{{author}}</div>
-              <div class="col col-xs-3 col-sm-1 col-md-1">{{year}}</div>
-              <div class="col col-xs-0 col-sm-2 col-md-2 hidden-xs">{{totalPages}}</div>
+              <a href="/entry/{{title}}/view">
+                <div class="col col-xs-0 col-sm-1 col-md-1 image hidden-xs"><img src="/done/{{pdf}}/0.png"></div>
+                <div class="col col-xs-5 col-sm-5 col-md-5">{{title}}</div>
+                <div class="col col-xs-3 col-sm-3 col-md-3">{{author}}</div>
+                <div class="col col-xs-3 col-sm-2 col-md-2">{{year}}</div>
+                <div class="col col-xs-0 col-sm-1 col-md-1 hidden-xs">{{totalPages}}</div>
+              </a>
             </div>
         {{/each}}
       </div>

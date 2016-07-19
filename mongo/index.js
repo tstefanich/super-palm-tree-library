@@ -28,20 +28,30 @@ database.init()
         app.listen( 8080, function() {  
           console.log( 'Express server listening on port 8080' );
         });
+
+
     })
     .catch((err) => console.log("uh oh: " + err.message)); 
 
 
-var j = schedule.scheduleJob('30 * * * * *', function(){
-	var trash = exec('find ./data/trash/* -mtime +30 -exec rm -f {} \\; ').stdout;
-	//var trash = cp.fork('./schedules/trash');
-	//trash.on('close', (code) => console.log(`trash exited w/ code ${code}`));
+var j = schedule.scheduleJob('00 00 24 * * *', function(){
+    console.log('Trash Cron Success');
+	
+    var trash = exec('find ./data/trash/* -mtime +30 -exec rm -f {} \\; ').stdout;
 });
 
-// var j = schedule.scheduleJob('30 * * * * *', function(){
-// 	var trash = cp.fork('./schedules/trash');
-// 	trash.on('close', (code) => console.log(`trash exited w/ code ${code}`));
-// });
+
+var b = schedule.scheduleJob('00 00 24 * * *', function(){
+    console.log('Database Backup Cron Success');
+
+    var d = new Date();
+    var curr_date = d.getDate();
+    var curr_month = d.getMonth() + 1; //Months are zero based
+    var curr_year = d.getFullYear();
+
+    var trashBackups = exec('find ./data/database-backups/* -mtime +30 -exec rm -f {} \\; ').stdout;
+    var dbBackups = exec('mongodump --out ./data/database-backups/date-'+curr_year + '-' + curr_month + '-' +curr_date+'').stdout;
+});
 
 
 // dealing with exit since we've got children

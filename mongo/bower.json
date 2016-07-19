@@ -16,6 +16,7 @@
   "dependencies": {
     "dropzone": "^4.3.0",
     "bootstrap": "^3.3.6",
-    "pdfjs-bower": "^1.0.233"
+    "pdfjs-dist": "^1.5.341",
+    "requirejs": "^2.2.0"
   }
 }
