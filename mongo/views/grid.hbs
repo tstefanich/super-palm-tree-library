@@ -3,13 +3,17 @@
     <div class="container">
       <div id="products" class="grid">
         {{#each books}}
+                      <a href="/{{title}}/view">
+
             <div data-pdf-file="{{pdf}}" class="item item-content clearfix col-xs-6 col-sm-3 col-md-2">
               <div class="col col-xs-12 col-sm-12 col-md-12 image"><img src="/done/{{pdf}}/0.png"></div>
               <div class="col col-xs-12 col-sm-12 col-md-12 title">{{title}}</div>
               <!--<div class="col col-xs-3 col-sm-3 col-md-3">{{author}}</div>
               <div class="col col-xs-3 col-sm-1 col-md-1">{{year}}</div>
               <div class="col col-xs-0 col-sm-2 col-md-2 hidden-xs">{{totalPages}}</div>-->
+              
             </div>
+            </a>
         {{/each}}
       </div>
     </div><!-- /.container -->

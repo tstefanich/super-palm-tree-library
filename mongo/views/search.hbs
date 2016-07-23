@@ -9,11 +9,13 @@
         </div>
 
         {{#each search_results}}
+            <a href="/{{title}}/view">
             <div class="item list-group-item clearfix col-md-4">
               <div class="col col-md-4">{{title}}</div>
               <div class="col col-md-4">----</div>
               <div class="col col-md-4">{{page}}</div>
             </div>
+            </a>
         {{/each}}
       </div>
     </div><!-- /.container -->

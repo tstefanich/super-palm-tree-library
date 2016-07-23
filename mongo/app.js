@@ -138,7 +138,7 @@ app.get(/(.*\.pdf)\/([0-9]+).png$/i, function (req, res) {
  -- This is now used for Single View
 
 ************************************/
-app.get('/entry/:title/view', function(req, res) {
+app.get('/:title/view', function(req, res) {
     var title = req.params.title;
     title = title.split('!!!!!!!!!!!!!!!!!!');//Ther should be an easier way.
     console.log(title);
@@ -148,7 +148,7 @@ app.get('/entry/:title/view', function(req, res) {
     });
 });
 
-app.get('/entry/:title/edit', function(req, res) {
+app.get('/:title/edit', function(req, res) {
     var title = req.params.title;
     title = title.split('!!!!!!!!!!!!!!!!!!');//Ther should be an easier way.
     console.log(title);

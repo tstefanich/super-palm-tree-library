@@ -19,7 +19,7 @@
 var pathArray = window.location.pathname.split( '/' );
 
 
-var DEFAULT_URL = '/done/'+pathArray[2]+'.pdf';
+var DEFAULT_URL = '/done/'+pathArray[1]+'.pdf';
 
 
   var pdfjsWebLibs = {
